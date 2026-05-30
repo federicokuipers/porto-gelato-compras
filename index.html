@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Porto Gelato — Gestión de Compras</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --y:#FFD600;--yd:#E6C200;--yp:#FFFBE6;
+  --bk:#1A1A1A;--dk:#2A2A2A;--g7:#4A4A4A;--g5:#888;--g3:#CCC;--g2:#E8E8E8;--g1:#F5F5F5;
+  --wh:#FFFFFF;--gn:#22C55E;--gnp:#DCFCE7;--rd:#EF4444;--rdp:#FEE2E2;
+  --or:#F97316;--orp:#FFF7ED;--bl:#3B82F6;--blp:#DBEAFE;
+  --r:12px;--rs:8px;--sh:0 2px 12px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--g1);color:var(--bk);min-height:100vh;}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bk);}
+.login-box{background:var(--wh);border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.login-logo{width:48px;height:48px;background:var(--y);border-radius:10px;display:grid;place-items:center;margin-bottom:16px;}
+.login-logo span{font-size:16px;font-weight:700;color:var(--bk);}
+.login-box h1{font-size:20px;font-weight:600;margin-bottom:3px;}
+.login-box p{font-size:13px;color:var(--g5);margin-bottom:24px;}
+.lf{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.lf label{font-size:11px;font-weight:600;color:var(--g5);text-transform:uppercase;letter-spacing:.05em;}
+.lf select,.lf input{border:1.5px solid var(--g2);border-radius:var(--rs);padding:10px 12px;font-family:inherit;font-size:14px;outline:none;transition:border-color .15s;}
+.lf select:focus,.lf input:focus{border-color:var(--y);}
+.lerr{background:var(--rdp);color:#DC2626;border-radius:var(--rs);padding:10px 14px;font-size:13px;font-weight:500;margin-bottom:10px;display:none;border-left:3px solid var(--rd);}
+.lerr.on{display:block;}
+
+/* NAV */
+.nav{background:var(--bk);padding:0 16px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.3);}
+.nb{display:flex;align-items:center;gap:8px;}
+.ndot{width:28px;height:28px;background:var(--y);border-radius:6px;display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--bk);flex-shrink:0;}
+.ntitle{color:var(--wh);font-size:13px;font-weight:600;}
+.nsub{color:var(--g5);font-size:10px;}
+.ntabs{display:flex;gap:2px;align-items:center;flex-wrap:wrap;}
+.ntab{padding:5px 10px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;color:var(--g5);border:none;background:transparent;transition:all .15s;font-family:inherit;display:none;white-space:nowrap;}
+.ntab.on{background:var(--y);color:var(--bk);}
+.ntab:hover:not(.on){background:rgba(255,255,255,.08);color:var(--wh);}
+.nav-role{background:rgba(255,255,255,.08);border-radius:20px;padding:2px 8px;font-size:10px;color:var(--g5);margin-right:4px;white-space:nowrap;}
+.btn-logout{background:transparent;border:1px solid #444;color:var(--g5);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit;}
+.btn-logout:hover{border-color:var(--rd);color:var(--rd);}
+
+/* SCREENS */
+.scr{display:none;padding:16px;max-width:1000px;margin:0 auto;}
+.scr.on{display:block;}
+
+/* CARDS */
+.card{background:var(--wh);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin-bottom:12px;}
+.ch{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap;}
+.ct{font-size:14px;font-weight:600;}
+.cs{font-size:11px;color:var(--g5);margin-top:2px;}
+
+/* FORM */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ff{display:flex;flex-direction:column;gap:4px;}
+.ff.full{grid-column:1/-1;}
+.ff label{font-size:11px;font-weight:600;color:var(--g5);text-transform:uppercase;letter-spacing:.05em;}
+.ff input,.ff select,.ff textarea{border:1.5px solid var(--g2);border-radius:var(--rs);padding:9px 10px;font-family:inherit;font-size:13px;outline:none;transition:border-color .15s;background:var(--wh);}
+.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--y);}
+.ff textarea{resize:vertical;min-height:60px;}
+
+/* CARRITO */
+.carrito-header{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;align-items:end;padding:10px 12px;background:var(--bk);border-radius:var(--rs);margin-bottom:8px;}
+.carrito-header span{font-size:10px;font-weight:600;color:var(--g5);text-transform:uppercase;letter-spacing:.05em;}
+.carrito-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;align-items:center;padding:6px 8px;background:var(--g1);border-radius:var(--rs);margin-bottom:4px;border:1px solid var(--g2);}
+.carrito-row input,.carrito-row select{border:1.5px solid var(--g2);border-radius:6px;padding:7px 8px;font-family:inherit;font-size:12px;outline:none;background:var(--wh);width:100%;}
+.carrito-row input:focus,.carrito-row select:focus{border-color:var(--y);}
+.carrito-empty{text-align:center;padding:20px;color:var(--g5);font-size:12px;background:var(--g1);border-radius:var(--rs);border:1.5px dashed var(--g2);}
+.carrito-total{background:var(--yp);border:1.5px solid var(--y);border-radius:var(--rs);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+.carrito-total .ct-label{font-size:13px;font-weight:600;color:var(--bk);}
+.carrito-total .ct-count{font-family:'DM Mono',monospace;font-size:20px;font-weight:700;color:var(--bk);}
+
+/* BUTTONS */
+.btn{border:none;border-radius:var(--rs);padding:10px 16px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.btn-y{background:var(--y);color:var(--bk);}
+.btn-y:hover{background:var(--yd);}
+.btn-y:disabled{opacity:.45;cursor:not-allowed;}
+.btn-s{background:var(--g1);color:var(--g7);}
+.btn-s:hover{background:var(--g2);}
+.btn-g{background:var(--gnp);color:#15803D;}
+.btn-g:hover{background:#bbf7d0;}
+.btn-r{background:var(--rdp);color:#DC2626;}
+.btn-r:hover{background:#fecaca;}
+.btn-full{width:100%;margin-top:12px;}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.btn-xs{padding:3px 8px;font-size:10px;border-radius:5px;}
+
+/* BADGES */
+.badge{display:inline-block;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:600;}
+.bg{background:var(--gnp);color:#15803D;}
+.br{background:var(--rdp);color:#DC2626;}
+.by{background:var(--yp);color:#92400E;}
+.bbl{background:var(--blp);color:#1D4ED8;}
+.bor{background:var(--orp);color:#C2410C;}
+.bgr{background:var(--g2);color:var(--g7);}
+
+/* URGENCIA */
+.urg-alta{color:#DC2626;font-weight:700;}
+.urg-media{color:#D97706;font-weight:600;}
+.urg-baja{color:#15803D;}
+
+/* TABLE */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{background:var(--g1);padding:8px 10px;text-align:left;font-size:10px;font-weight:600;color:var(--g5);text-transform:uppercase;letter-spacing:.05em;border-bottom:1.5px solid var(--g2);white-space:nowrap;}
+tbody td{padding:9px 10px;border-bottom:1px solid var(--g1);vertical-align:middle;}
+tbody tr:hover{background:var(--g1);}
+.mono{font-family:'DM Mono',monospace;font-size:11px;}
+
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--wh);border-radius:var(--r);padding:14px;box-shadow:var(--sh);}
+.kpi.hi{background:var(--bk);}
+.kpi.warn{background:var(--rdp);border:1.5px solid var(--rd);}
+.kpi.ok{background:var(--gnp);border:1.5px solid var(--gn);}
+.kl{font-size:10px;font-weight:600;color:var(--g5);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+.kv{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--bk);}
+.kpi.hi .kl,.kpi.hi .ks{color:var(--g5);}
+.kpi.hi .kv{color:var(--y);}
+.kpi.warn .kl,.kpi.warn .ks,.kpi.warn .kv{color:#DC2626;}
+.kpi.ok .kl,.kpi.ok .ks,.kpi.ok .kv{color:#15803D;}
+.ks{font-size:10px;color:var(--g5);margin-top:2px;}
+
+/* ALERT */
+.al{border-radius:var(--rs);padding:10px 14px;font-size:12px;font-weight:500;margin-bottom:10px;display:none;border-left:3px solid;}
+.al.on{display:block;}
+.al-ok{background:var(--gnp);color:#15803D;border-color:var(--gn);}
+.al-err{background:var(--rdp);color:#DC2626;border-color:var(--rd);}
+.al-info{background:var(--blp);color:#1D4ED8;border-color:var(--bl);}
+
+/* PEDIDO CARD */
+.pedido-card{background:var(--wh);border-radius:var(--r);padding:14px;box-shadow:var(--sh);margin-bottom:8px;border-left:4px solid var(--g2);}
+.pedido-card.urgente{border-left-color:var(--rd);}
+.pedido-card.media{border-left-color:var(--or);}
+.pedido-card.baja{border-left-color:var(--gn);}
+.pedido-card .ph{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.pedido-card .pt{font-size:14px;font-weight:600;}
+.pedido-card .ps{font-size:11px;color:var(--g5);margin-top:2px;}
+
+/* ITEMS LIST */
+.items-list{display:flex;flex-direction:column;gap:4px;margin:8px 0;}
+.item-row{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--g1);border-radius:6px;font-size:12px;}
+.item-row .ir-name{font-weight:500;flex:1;}
+.item-row .ir-qty{font-family:'DM Mono',monospace;color:var(--g7);margin:0 12px;}
+.item-row .ir-urg{font-size:10px;}
+
+/* PROVEEDOR SECTION */
+.prov-section{background:var(--wh);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin-bottom:12px;}
+.prov-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid var(--y);}
+.prov-name{font-size:15px;font-weight:700;}
+.prov-cond{font-size:11px;color:var(--g5);margin-top:2px;}
+
+/* DEUDA */
+.deuda-card{background:var(--wh);border-radius:var(--r);padding:14px;box-shadow:var(--sh);margin-bottom:8px;}
+.deuda-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.deuda-name{font-size:14px;font-weight:600;}
+.deuda-total{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;}
+.deuda-total.alto{color:var(--rd);}
+.deuda-total.medio{color:var(--or);}
+.deuda-total.ok{color:var(--gn);}
+
+/* TABS */
+.itabs{display:flex;gap:3px;margin-bottom:12px;background:var(--g2);border-radius:var(--rs);padding:3px;width:fit-content;flex-wrap:wrap;}
+.itab{padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--g7);transition:all .15s;font-family:inherit;}
+.itab.on{background:var(--wh);color:var(--bk);box-shadow:0 1px 4px rgba(0,0,0,.1);}
+
+.tag-area{display:inline-block;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:600;}
+.tag-helados{background:#DBEAFE;color:#1D4ED8;}
+.tag-reposteria{background:#EDE9FE;color:#6D28D9;}
+.tag-direccion{background:#FFF7ED;color:#C2410C;}
+
+.divider{height:1px;background:var(--g2);margin:12px 0;}
+.empty{text-align:center;padding:24px;color:var(--g5);font-size:12px;}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid var(--g2);border-top-color:var(--bk);border-radius:50%;animation:spn .6s linear infinite;}
+@keyframes spn{to{transform:rotate(360deg)}}
+
+@media(max-width:640px){
+  .kpis{grid-template-columns:1fr 1fr;}
+  .fg{grid-template-columns:1fr;}
+  .carrito-header,.carrito-row{grid-template-columns:1fr 80px 80px auto;}
+  .carrito-header span:nth-child(3),.carrito-row select:nth-child(3){display:none;}
+  .scr{padding:12px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="pg-login" class="login-wrap">
+  <div class="login-box">
+    <div class="login-logo"><span>PG</span></div>
+    <h1>Porto Gelato</h1>
+    <p>Gestión de Compras — ingresá con tus credenciales</p>
+    <div class="lerr" id="login-err">Usuario o contraseña incorrectos.</div>
+    <div class="lf">
+      <label>Usuario</label>
+      <select id="login-user">
+        <option value="">— Seleccioná tu usuario —</option>
+        <option value="helados">Jefe Fábrica Helados</option>
+        <option value="reposteria">Jefa Fábrica Repostería</option>
+        <option value="direccion">Dirección</option>
+        <option value="candela">Candela — Compras</option>
+        <option value="santiago">Santiago — Pagos</option>
+        <option value="admin">Administrador</option>
+      </select>
+    </div>
+    <div class="lf">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-y btn-full" onclick="doLogin()" style="margin-top:0">Ingresar</button>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="pg-app" style="display:none">
+
+<nav class="nav">
+  <div class="nb">
+    <div class="ndot">PG</div>
+    <div><div class="ntitle">Compras</div><div class="nsub" id="nav-user">—</div></div>
+  </div>
+  <div class="ntabs">
+    <span class="nav-role" id="nav-role"></span>
+    <button class="ntab" id="ntab-nuevo"      onclick="showScr('nuevo',this)">Nuevo pedido</button>
+    <button class="ntab" id="ntab-mispedidos" onclick="showScr('mispedidos',this)">Mis pedidos</button>
+    <button class="ntab" id="ntab-candela"    onclick="showScr('candela',this)">Gestión compras</button>
+    <button class="ntab" id="ntab-pagos"      onclick="showScr('pagos',this)">Pagos</button>
+    <button class="ntab" id="ntab-admin"      onclick="showScr('admin',this)">Admin</button>
+    <button class="btn-logout" onclick="doLogout()">Salir</button>
+  </div>
+</nav>
+
+<!-- ══ NUEVO PEDIDO ══ -->
+<div id="scr-nuevo" class="scr">
+  <div class="card">
+    <div class="ch">
+      <div><div class="ct">Nuevo pedido</div><div class="cs">Agregá todos los insumos que necesitás y enviá un solo pedido</div></div>
+    </div>
+    <div id="al-nuevo" class="al"></div>
+
+    <!-- Info del pedido -->
+    <div class="fg" style="margin-bottom:12px">
+      <div class="ff">
+        <label>Área solicitante</label>
+        <input id="p-area" readonly style="background:var(--g1);color:var(--g7)">
+      </div>
+      <div class="ff">
+        <label>Proveedor preferido (opcional)</label>
+        <select id="p-prov">
+          <option value="">— Que lo defina Candela —</option>
+          <option value="La Serenísima">La Serenísima</option>
+          <option value="Molinos Río de la Plata">Molinos Río de la Plata</option>
+          <option value="Arcor">Arcor</option>
+          <option value="Distribuidora Norte">Distribuidora Norte</option>
+          <option value="El Trigal">El Trigal</option>
+          <option value="Otros">Otros</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- AGREGAR ÍTEM AL CARRITO -->
+    <div class="card" style="background:var(--g1);box-shadow:none;border:1.5px solid var(--g2)">
+      <div class="ct" style="margin-bottom:10px">Agregar ítem al pedido</div>
+      <div class="fg">
+        <div class="ff full"><label>Producto / Insumo</label><input id="item-producto" placeholder="Ej: Leche en polvo, Neutro, Azúcar..."></div>
+        <div class="ff"><label>Cantidad</label><input type="number" id="item-cantidad" placeholder="Ej: 50" min="0"></div>
+        <div class="ff"><label>Unidad</label>
+          <select id="item-unidad">
+            <option value="kg">kg</option>
+            <option value="litros">litros</option>
+            <option value="unidades">unidades</option>
+            <option value="cajas">cajas</option>
+            <option value="bolsas">bolsas</option>
+            <option value="fardos">fardos</option>
+            <option value="latas">latas</option>
+            <option value="otros">otros</option>
+          </select>
+        </div>
+        <div class="ff"><label>Urgencia</label>
+          <select id="item-urgencia">
+            <option value="alta">🔴 Alta — hoy o mañana</option>
+            <option value="media" selected>🟡 Media — esta semana</option>
+            <option value="baja">🟢 Baja — cuando se pueda</option>
+          </select>
+        </div>
+        <div class="ff"><label>Obs. del ítem</label><input id="item-obs" placeholder="Ej: igual al anterior"></div>
+        <div class="ff" style="justify-content:flex-end">
+          <label style="opacity:0">a</label>
+          <button class="btn btn-y" onclick="agregarItem()" style="width:100%">+ Agregar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARRITO -->
+    <div style="margin:14px 0 6px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between">
+      <span>Ítems del pedido</span>
+      <button class="btn btn-xs btn-r" onclick="limpiarCarrito()" id="btn-limpiar" style="display:none">Limpiar todo</button>
+    </div>
+    <div id="carrito-list"><div class="carrito-empty">Todavía no agregaste ítems.<br>Completá el formulario de arriba y hacé clic en "+ Agregar".</div></div>
+    <div id="carrito-resumen" style="display:none" class="carrito-total">
+      <div class="ct-label">Total de ítems en el pedido</div>
+      <div class="ct-count" id="carrito-count">0</div>
+    </div>
+
+    <!-- OBS GENERALES -->
+    <div class="ff full" style="margin-top:12px">
+      <label>Observaciones generales del pedido</label>
+      <textarea id="p-obs" placeholder="Ej: Necesito todo junto si es posible, factura A, etc."></textarea>
+    </div>
+
+    <button class="btn btn-y btn-full" id="btn-enviar" onclick="enviarPedido()">
+      Enviar pedido a Candela →
+    </button>
+  </div>
+</div>
+
+<!-- ══ MIS PEDIDOS ══ -->
+<div id="scr-mispedidos" class="scr">
+  <div class="card">
+    <div class="ch">
+      <div><div class="ct">Mis pedidos</div><div class="cs">Estado de todos tus pedidos enviados</div></div>
+      <button class="btn btn-sm btn-s" onclick="loadMisPedidos()">↻ Actualizar</button>
+    </div>
+    <div id="mis-pedidos-list"><div class="empty">Cargando...</div></div>
+  </div>
+</div>
+
+<!-- ══ CANDELA ══ -->
+<div id="scr-candela" class="scr">
+  <div class="kpis">
+    <div class="kpi hi"><div class="kl">Pedidos pendientes</div><div class="kv" id="kpi-pendientes">—</div><div class="ks">sin gestionar</div></div>
+    <div class="kpi warn"><div class="kl">Urgentes</div><div class="kv" id="kpi-urgentes">—</div><div class="ks">para hoy/mañana</div></div>
+    <div class="kpi"><div class="kl">En camino</div><div class="kv" id="kpi-encamino">—</div><div class="ks">pedido realizado</div></div>
+    <div class="kpi ok"><div class="kl">Entregados</div><div class="kv" id="kpi-entregados">—</div><div class="ks">recibidos ok</div></div>
+  </div>
+
+  <div class="itabs">
+    <button class="itab on" id="ctab-pendientes" onclick="showCTab('pendientes',this)">Pendientes</button>
+    <button class="itab" id="ctab-encamino" onclick="showCTab('encamino',this)">En camino</button>
+    <button class="itab" id="ctab-historial" onclick="showCTab('historial',this)">Historial</button>
+  </div>
+
+  <div id="ctab-content-pendientes">
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct">Pedidos por gestionar</div><div class="cs">Agrupados por proveedor</div></div>
+        <button class="btn btn-sm btn-s" onclick="loadCandela()">↻ Actualizar</button>
+      </div>
+      <div id="candela-pendientes-list"><div class="empty">Cargando...</div></div>
+    </div>
+  </div>
+
+  <div id="ctab-content-encamino" style="display:none">
+    <div class="card">
+      <div class="ch"><div class="ct">En camino — esperando entrega</div></div>
+      <div class="tw"><table>
+        <thead><tr><th>Fecha</th><th>Área</th><th>Proveedor</th><th>Ítems</th><th>Entrega est.</th><th>Acciones</th></tr></thead>
+        <tbody id="encamino-body"><tr><td colspan="6" class="empty">Sin pedidos en camino</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div id="ctab-content-historial" style="display:none">
+    <div class="card">
+      <div class="ch"><div class="ct">Historial completo</div></div>
+      <div class="tw"><table>
+        <thead><tr><th>Fecha</th><th>Área</th><th>Proveedor</th><th>Ítems</th><th>Estado</th><th>Monto</th></tr></thead>
+        <tbody id="historial-body"><tr><td colspan="6" class="empty">Sin historial aún</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGOS ══ -->
+<div id="scr-pagos" class="scr">
+  <div class="kpis">
+    <div class="kpi warn"><div class="kl">Deuda total</div><div class="kv mono" id="kpi-deuda-total">—</div><div class="ks">todos los proveedores</div></div>
+    <div class="kpi"><div class="kl">Vence esta semana</div><div class="kv mono" id="kpi-vence-semana">—</div><div class="ks">pagar urgente</div></div>
+    <div class="kpi ok"><div class="kl">Pagado este mes</div><div class="kv mono" id="kpi-pagado-mes">—</div><div class="ks">total abonado</div></div>
+    <div class="kpi"><div class="kl">Proveedores con deuda</div><div class="kv" id="kpi-provs-activos">—</div><div class="ks">pendientes</div></div>
+  </div>
+
+  <div class="itabs">
+    <button class="itab on" id="ptab-deuda" onclick="showPTab('deuda',this)">Deuda por proveedor</button>
+    <button class="itab" id="ptab-pago" onclick="showPTab('pago',this)">Registrar pago</button>
+    <button class="itab" id="ptab-historial" onclick="showPTab('historial',this)">Historial pagos</button>
+  </div>
+
+  <div id="ptab-content-deuda">
+    <div id="deuda-list"><div class="empty">Cargando...</div></div>
+  </div>
+
+  <div id="ptab-content-pago" style="display:none">
+    <div class="card">
+      <div class="ch"><div class="ct">Registrar pago</div></div>
+      <div id="al-pago" class="al"></div>
+      <div class="fg">
+        <div class="ff full"><label>Proveedor</label>
+          <select id="pago-prov">
+            <option value="">— Seleccioná el proveedor —</option>
+            <option>La Serenísima</option>
+            <option>Molinos Río de la Plata</option>
+            <option>Arcor</option>
+            <option>Distribuidora Norte</option>
+            <option>El Trigal</option>
+            <option>Otros</option>
+          </select>
+        </div>
+        <div class="ff"><label>Monto ($)</label><input type="number" id="pago-monto" placeholder="Ej: 150000" min="0"></div>
+        <div class="ff"><label>Fecha de pago</label><input type="date" id="pago-fecha"></div>
+        <div class="ff full"><label>Medio de pago</label>
+          <select id="pago-medio">
+            <option>Transferencia</option>
+            <option>Cheque</option>
+            <option>Efectivo</option>
+            <option>Débito</option>
+          </select>
+        </div>
+        <div class="ff full"><label>Observaciones</label><input id="pago-obs" placeholder="Ej: Pago parcial, N° de transferencia, etc."></div>
+      </div>
+      <button class="btn btn-y btn-full" onclick="registrarPago()">Confirmar pago</button>
+    </div>
+  </div>
+
+  <div id="ptab-content-historial" style="display:none">
+    <div class="card">
+      <div class="ch"><div class="ct">Historial de pagos</div></div>
+      <div class="tw"><table>
+        <thead><tr><th>Fecha</th><th>Proveedor</th><th style="text-align:right">Monto</th><th>Medio</th><th>Registrado por</th><th>Obs.</th></tr></thead>
+        <tbody id="pagos-historial-body"><tr><td colspan="6" class="empty">Sin pagos aún</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADMIN ══ -->
+<div id="scr-admin" class="scr">
+  <div class="kpis">
+    <div class="kpi hi"><div class="kl">Total pedidos</div><div class="kv" id="adm-total">—</div><div class="ks">todos los estados</div></div>
+    <div class="kpi warn"><div class="kl">Deuda proveedores</div><div class="kv mono" id="adm-deuda">—</div><div class="ks">total pendiente</div></div>
+    <div class="kpi ok"><div class="kl">Pagado este mes</div><div class="kv mono" id="adm-pagado">—</div><div class="ks">abonado</div></div>
+    <div class="kpi"><div class="kl">Pendientes</div><div class="kv" id="adm-pendientes">—</div><div class="ks">sin gestionar</div></div>
+  </div>
+  <div class="card">
+    <div class="ch">
+      <div><div class="ct">Todos los pedidos</div></div>
+      <button class="btn btn-sm btn-s" onclick="loadAdmin()">↻ Actualizar</button>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>Fecha</th><th>Área</th><th>Proveedor</th><th>Ítems</th><th>Urgencia máx.</th><th>Estado</th><th>Monto</th></tr></thead>
+      <tbody id="admin-body"><tr><td colspan="7" class="empty">Cargando...</td></tr></tbody>
+    </table></div>
+  </div>
+</div>
+
+</div><!-- /pg-app -->
+
+<script>
+// ════════════════════════════════
+// CONFIGURACIÓN
+// ════════════════════════════════
+const API_URL = ''; // Pegar URL Apps Script acá cuando esté listo
+
+const USUARIOS = {
+  helados:    { pass:'hel2026',  rol:'solicitante', nombre:'Jefe Helados',     area:'Fábrica Helados' },
+  reposteria: { pass:'rep2026',  rol:'solicitante', nombre:'Jefa Repostería',  area:'Fábrica Repostería' },
+  direccion:  { pass:'dir2026',  rol:'solicitante', nombre:'Dirección',         area:'Dirección' },
+  candela:    { pass:'can2026',  rol:'candela',     nombre:'Candela',           area:'Compras' },
+  santiago:   { pass:'san2026',  rol:'santiago',    nombre:'Santiago',          area:'Pagos' },
+  admin:      { pass:'adm2026',  rol:'admin',       nombre:'Administrador',     area:'Admin' },
+};
+
+const PROVEEDORES = [
+  { nombre:'La Serenísima',           condicion:'Cta. corriente 30 días' },
+  { nombre:'Molinos Río de la Plata', condicion:'Cta. corriente 30 días' },
+  { nombre:'Arcor',                   condicion:'Cta. corriente 15 días' },
+  { nombre:'Distribuidora Norte',     condicion:'Contado' },
+  { nombre:'El Trigal',               condicion:'Contado' },
+  { nombre:'Otros',                   condicion:'Variable' },
+];
+
+// ════════════════════════════════
+// STATE
+// ════════════════════════════════
+let sesion = null;
+let carrito = [];
+let pedidos = [];
+let pagos   = [];
+let deudas  = [];
+
+const fmt   = n => '$' + Math.round(n).toLocaleString('es-AR');
+const toDay = () => new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
+const toTime= () => new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+const uid   = () => 'P' + Date.now().toString().slice(-6);
+
+// Datos demo
+function initDemo() {
+  pedidos = [
+    { id:'P001', fecha:'14/05/2026', hora:'09:15', area:'Fábrica Helados', solicitante:'Jefe Helados',
+      proveedor:'La Serenísima', obs:'Misma calidad siempre', estado:'pendiente', monto:0,
+      items:[
+        { producto:'Leche entera', cantidad:200, unidad:'litros', urgencia:'alta', obs:'' },
+        { producto:'Crema de leche', cantidad:50, unidad:'litros', urgencia:'alta', obs:'entera' },
+        { producto:'Leche en polvo', cantidad:30, unidad:'kg', urgencia:'media', obs:'' },
+      ]},
+    { id:'P002', fecha:'14/05/2026', hora:'10:30', area:'Fábrica Repostería', solicitante:'Jefa Repostería',
+      proveedor:'Molinos Río de la Plata', obs:'', estado:'pedido_realizado', monto:45000, fechaEntrega:'16/05/2026',
+      items:[
+        { producto:'Harina 000', cantidad:50, unidad:'kg', urgencia:'media', obs:'' },
+        { producto:'Azúcar', cantidad:40, unidad:'kg', urgencia:'media', obs:'' },
+      ]},
+    { id:'P003', fecha:'13/05/2026', hora:'16:45', area:'Dirección', solicitante:'Dirección',
+      proveedor:'Distribuidora Norte', obs:'', estado:'entregado', monto:28000,
+      items:[
+        { producto:'Vasos descartables 250cc', cantidad:2000, unidad:'unidades', urgencia:'baja', obs:'' },
+        { producto:'Cucharitas descartables', cantidad:2000, unidad:'unidades', urgencia:'baja', obs:'' },
+      ]},
+    { id:'P004', fecha:'13/05/2026', hora:'11:00', area:'Fábrica Helados', solicitante:'Jefe Helados',
+      proveedor:'Arcor', obs:'', estado:'pendiente', monto:0,
+      items:[
+        { producto:'Cobertura chocolate semiamargo', cantidad:30, unidad:'kg', urgencia:'baja', obs:'semiamargo' },
+        { producto:'Cacao en polvo', cantidad:15, unidad:'kg', urgencia:'baja', obs:'' },
+      ]},
+    { id:'P005', fecha:'13/05/2026', hora:'14:20', area:'Fábrica Repostería', solicitante:'Jefa Repostería',
+      proveedor:'El Trigal', obs:'El mismo de siempre', estado:'pendiente', monto:0,
+      items:[
+        { producto:'Dulce de leche repostero', cantidad:20, unidad:'kg', urgencia:'alta', obs:'no el light' },
+        { producto:'Neutro para helado', cantidad:5, unidad:'kg', urgencia:'media', obs:'' },
+      ]},
+  ];
+  pagos = [
+    { id:'PAG001', fecha:'10/05/2026', proveedor:'La Serenísima',           monto:250000, medio:'Transferencia', registradoPor:'Santiago', obs:'Pago factura abril' },
+    { id:'PAG002', fecha:'08/05/2026', proveedor:'Arcor',                   monto:180000, medio:'Cheque',        registradoPor:'Santiago', obs:'' },
+    { id:'PAG003', fecha:'05/05/2026', proveedor:'El Trigal',               monto:45000,  medio:'Efectivo',      registradoPor:'Santiago', obs:'' },
+  ];
+  deudas = [
+    { proveedor:'La Serenísima',           deudaTotal:420000, vencimiento:'20/05/2026', condicion:'Cta. corriente 30 días' },
+    { proveedor:'Molinos Río de la Plata', deudaTotal:180000, vencimiento:'25/05/2026', condicion:'Cta. corriente 30 días' },
+    { proveedor:'Arcor',                   deudaTotal:95000,  vencimiento:'18/05/2026', condicion:'Cta. corriente 15 días' },
+    { proveedor:'El Trigal',               deudaTotal:0,      vencimiento:'—',          condicion:'Contado' },
+    { proveedor:'Distribuidora Norte',     deudaTotal:32000,  vencimiento:'15/05/2026', condicion:'Contado — pendiente' },
+  ];
+}
+
+// ════════════════════════════════
+// LOGIN
+// ════════════════════════════════
+function doLogin() {
+  const uid  = document.getElementById('login-user').value;
+  const pass = document.getElementById('login-pass').value;
+  const err  = document.getElementById('login-err');
+  if (!uid) { err.textContent='Seleccioná tu usuario.'; err.classList.add('on'); return; }
+  const u = USUARIOS[uid];
+  if (!u || pass !== u.pass) { err.textContent='Contraseña incorrecta.'; err.classList.add('on'); return; }
+  err.classList.remove('on');
+  sesion = { ...u, id: uid };
+  document.getElementById('pg-login').style.display = 'none';
+  document.getElementById('pg-app').style.display   = 'block';
+  document.getElementById('nav-user').textContent   = u.nombre;
+  document.getElementById('nav-role').textContent   = u.area;
+  document.getElementById('p-area').value           = u.area;
+  document.getElementById('pago-fecha').value       = new Date().toISOString().split('T')[0];
+  initDemo();
+  setupTabs();
+}
+
+function doLogout() {
+  sesion = null; carrito = [];
+  document.getElementById('pg-app').style.display  = 'none';
+  document.getElementById('pg-login').style.display = 'flex';
+  document.getElementById('login-pass').value = '';
+}
+
+function setupTabs() {
+  const tabMap = {
+    solicitante: ['ntab-nuevo','ntab-mispedidos'],
+    candela:     ['ntab-nuevo','ntab-mispedidos','ntab-candela'],
+    santiago:    ['ntab-pagos'],
+    admin:       ['ntab-nuevo','ntab-mispedidos','ntab-candela','ntab-pagos','ntab-admin'],
+  };
+  document.querySelectorAll('.ntab').forEach(t => t.style.display='none');
+  const tabs = tabMap[sesion.rol] || [];
+  tabs.forEach(id => document.getElementById(id).style.display='inline-flex');
+  const primera = tabs[0].replace('ntab-','');
+  showScr(primera, document.getElementById(tabs[0]));
+}
+
+// ════════════════════════════════
+// NAV
+// ════════════════════════════════
+function showScr(id, btn) {
+  document.querySelectorAll('.scr').forEach(e => e.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(e => e.classList.remove('on'));
+  document.getElementById('scr-'+id).classList.add('on');
+  if (btn) btn.classList.add('on');
+  if (id==='candela')    loadCandela();
+  if (id==='mispedidos') loadMisPedidos();
+  if (id==='pagos')      loadPagos();
+  if (id==='admin')      loadAdmin();
+}
+
+// ════════════════════════════════
+// CARRITO
+// ════════════════════════════════
+function agregarItem() {
+  const prod = document.getElementById('item-producto').value.trim();
+  const cant = parseFloat(document.getElementById('item-cantidad').value);
+  const uni  = document.getElementById('item-unidad').value;
+  const urg  = document.getElementById('item-urgencia').value;
+  const obs  = document.getElementById('item-obs').value.trim();
+  if (!prod) { showAl('al-nuevo','Ingresá el nombre del producto.','err'); return; }
+  if (!cant || cant <= 0) { showAl('al-nuevo','Ingresá la cantidad.','err'); return; }
+  carrito.push({ id: Date.now(), producto:prod, cantidad:cant, unidad:uni, urgencia:urg, obs });
+  document.getElementById('item-producto').value = '';
+  document.getElementById('item-cantidad').value = '';
+  document.getElementById('item-obs').value      = '';
+  document.getElementById('item-urgencia').value = 'media';
+  document.getElementById('item-producto').focus();
+  renderCarrito();
+}
+
+function quitarItem(id) {
+  carrito = carrito.filter(i => i.id !== id);
+  renderCarrito();
+}
+
+function limpiarCarrito() {
+  carrito = [];
+  renderCarrito();
+}
+
+function renderCarrito() {
+  const el = document.getElementById('carrito-list');
+  const res = document.getElementById('carrito-resumen');
+  const btn = document.getElementById('btn-limpiar');
+  if (!carrito.length) {
+    el.innerHTML = '<div class="carrito-empty">Todavía no agregaste ítems.<br>Completá el formulario de arriba y hacé clic en "+ Agregar".</div>';
+    res.style.display = 'none';
+    btn.style.display = 'none';
+    return;
+  }
+  btn.style.display = 'inline-flex';
+  res.style.display = 'flex';
+  document.getElementById('carrito-count').textContent = carrito.length + (carrito.length===1?' ítem':' ítems');
+  el.innerHTML = carrito.map(item => `
+    <div class="item-row">
+      <div class="ir-name">${item.producto}${item.obs ? ` <span style="color:var(--g5);font-weight:400;font-size:11px">— ${item.obs}</span>` : ''}</div>
+      <div class="ir-qty">${item.cantidad} ${item.unidad}</div>
+      <div class="ir-urg urg-${item.urgencia}">${urgLabel(item.urgencia)}</div>
+      <button class="btn btn-xs btn-r" onclick="quitarItem(${item.id})" style="margin-left:8px">✕</button>
+    </div>`).join('');
+}
+
+// ════════════════════════════════
+// ENVIAR PEDIDO
+// ════════════════════════════════
+function enviarPedido() {
+  if (!carrito.length) { showAl('al-nuevo','Agregá al menos un ítem al pedido.','err'); return; }
+  const urgMax = carrito.some(i=>i.urgencia==='alta') ? 'alta' : carrito.some(i=>i.urgencia==='media') ? 'media' : 'baja';
+  const nuevo = {
+    id: uid(),
+    fecha: toDay(), hora: toTime(),
+    area: sesion.area, solicitante: sesion.nombre,
+    proveedor: document.getElementById('p-prov').value,
+    obs: document.getElementById('p-obs').value.trim(),
+    estado: 'pendiente', monto: 0,
+    items: [...carrito],
+    urgenciaMax: urgMax,
+  };
+  pedidos.unshift(nuevo);
+  carrito = [];
+  renderCarrito();
+  document.getElementById('p-prov').value = '';
+  document.getElementById('p-obs').value  = '';
+  showAl('al-nuevo', `Pedido enviado con ${nuevo.items.length} ítem${nuevo.items.length>1?'s':''} — Candela lo recibió.`, 'ok');
+}
+
+// ════════════════════════════════
+// MIS PEDIDOS
+// ════════════════════════════════
+function loadMisPedidos() {
+  const el = document.getElementById('mis-pedidos-list');
+  const mis = pedidos.filter(p => p.area === sesion.area);
+  if (!mis.length) { el.innerHTML='<div class="empty">No tenés pedidos aún</div>'; return; }
+  el.innerHTML = mis.map(p => `
+    <div class="pedido-card ${urgClass(p.urgenciaMax||p.items?.[0]?.urgencia||'media')}">
+      <div class="ph">
+        <div>
+          <div class="pt">Pedido ${p.id} — ${p.items.length} ítem${p.items.length>1?'s':''}</div>
+          <div class="ps">${p.fecha} ${p.hora} · ${p.proveedor||'Proveedor a definir'}</div>
+          ${p.obs ? `<div class="ps" style="font-style:italic">"${p.obs}"</div>` : ''}
+        </div>
+        <div>${estadoBadge(p.estado)}</div>
+      </div>
+      <div class="items-list">${p.items.map(i=>`
+        <div class="item-row">
+          <div class="ir-name">${i.producto}${i.obs?` <span style="color:var(--g5);font-size:10px">— ${i.obs}</span>`:''}</div>
+          <div class="ir-qty">${i.cantidad} ${i.unidad}</div>
+          <div class="ir-urg urg-${i.urgencia}">${urgLabel(i.urgencia)}</div>
+        </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════
+// CANDELA
+// ════════════════════════════════
+function loadCandela() {
+  const pends    = pedidos.filter(p => p.estado==='pendiente');
+  const encamino = pedidos.filter(p => p.estado==='pedido_realizado');
+  const urgentes = pends.filter(p => p.items.some(i=>i.urgencia==='alta'));
+  const entregados = pedidos.filter(p => p.estado==='entregado');
+  document.getElementById('kpi-pendientes').textContent  = pends.length;
+  document.getElementById('kpi-urgentes').textContent    = urgentes.length;
+  document.getElementById('kpi-encamino').textContent    = encamino.length;
+  document.getElementById('kpi-entregados').textContent  = entregados.length;
+  renderPendientesCandela(pends);
+  renderEncamino(encamino);
+  renderHistorialCandela();
+}
+
+function renderPendientesCandela(pends) {
+  const el = document.getElementById('candela-pendientes-list');
+  if (!pends.length) { el.innerHTML='<div class="empty">Sin pedidos pendientes 🎉</div>'; return; }
+  // Agrupar por proveedor
+  const grupos = {};
+  pends.forEach(p => {
+    const key = p.proveedor || 'Sin proveedor definido';
+    if (!grupos[key]) grupos[key] = [];
+    grupos[key].push(p);
+  });
+  el.innerHTML = Object.entries(grupos).map(([prov, items]) => {
+    const provInfo = PROVEEDORES.find(p => p.nombre === prov);
+    const totalItems = items.reduce((s,p) => s + p.items.length, 0);
+    return `<div class="prov-section">
+      <div class="prov-header">
+        <div>
+          <div class="prov-name">${prov}</div>
+          <div class="prov-cond">${provInfo ? provInfo.condicion : 'Condición a confirmar'} · ${items.length} pedido${items.length>1?'s':''}, ${totalItems} ítem${totalItems>1?'s':''}</div>
+        </div>
+        <button class="btn btn-sm btn-y" onclick="marcarGrupoPedido('${prov}')">✓ Marcar todo como pedido</button>
+      </div>
+      ${items.map(p => `
+        <div style="background:var(--g1);border-radius:var(--rs);padding:12px;margin-bottom:8px;border-left:3px solid ${p.items.some(i=>i.urgencia==='alta')?'var(--rd)':'var(--or)'}">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+            <div>
+              <span class="tag-area tag-${areaClass(p.area)}">${p.area}</span>
+              <span style="font-size:11px;color:var(--g5);margin-left:8px">${p.solicitante} · ${p.fecha} ${p.hora}</span>
+              ${p.obs ? `<div style="font-size:11px;color:var(--g5);font-style:italic;margin-top:3px">"${p.obs}"</div>` : ''}
+            </div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input type="number" placeholder="Monto total $" id="monto-${p.id}" style="width:130px;border:1.5px solid var(--g2);border-radius:6px;padding:6px 8px;font-size:12px;outline:none" onfocus="this.style.borderColor='var(--y)'" onblur="this.style.borderColor='var(--g2)'">
+              <button class="btn btn-sm btn-g" onclick="marcarPedido('${p.id}')">✓ Pedido</button>
+              <button class="btn btn-sm btn-r" onclick="rechazarPedido('${p.id}')">✗</button>
+            </div>
+          </div>
+          <div class="items-list" style="margin:0">
+            ${p.items.map(i=>`<div class="item-row" style="background:var(--wh)">
+              <div class="ir-name">${i.producto}${i.obs?` <span style="color:var(--g5);font-size:10px">— ${i.obs}</span>`:''}</div>
+              <div class="ir-qty">${i.cantidad} ${i.unidad}</div>
+              <div class="ir-urg urg-${i.urgencia}">${urgLabel(i.urgencia)}</div>
+            </div>`).join('')}
+          </div>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+function renderEncamino(pends) {
+  const body = document.getElementById('encamino-body');
+  if (!pends.length) { body.innerHTML='<tr><td colspan="6" class="empty">Sin pedidos en camino</td></tr>'; return; }
+  body.innerHTML = pends.map(p => `<tr>
+    <td class="mono" style="font-size:10px">${p.fecha}</td>
+    <td><span class="tag-area tag-${areaClass(p.area)}">${p.area}</span></td>
+    <td>${p.proveedor||'—'}</td>
+    <td><span class="badge bbl">${p.items.length} ítem${p.items.length>1?'s':''}</span></td>
+    <td class="mono" style="font-size:10px">${p.fechaEntrega||'—'}</td>
+    <td><button class="btn btn-sm btn-g" onclick="marcarEntregado('${p.id}')">✓ Entregado</button></td>
+  </tr>`).join('');
+}
+
+function renderHistorialCandela() {
+  const body = document.getElementById('historial-body');
+  const todos = pedidos.filter(p => p.estado !== 'pendiente');
+  if (!todos.length) { body.innerHTML='<tr><td colspan="6" class="empty">Sin historial aún</td></tr>'; return; }
+  body.innerHTML = todos.map(p => `<tr>
+    <td class="mono" style="font-size:10px">${p.fecha}</td>
+    <td><span class="tag-area tag-${areaClass(p.area)}">${p.area}</span></td>
+    <td>${p.proveedor||'—'}</td>
+    <td>${p.items.length} ítem${p.items.length>1?'s':''}</td>
+    <td>${estadoBadge(p.estado)}</td>
+    <td class="mono" style="text-align:right">${p.monto ? fmt(p.monto) : '—'}</td>
+  </tr>`).join('');
+}
+
+function marcarPedido(id) {
+  const p = pedidos.find(x => x.id === id);
+  if (!p) return;
+  const montoEl = document.getElementById('monto-'+id);
+  p.monto    = montoEl ? parseFloat(montoEl.value)||0 : 0;
+  p.estado   = 'pedido_realizado';
+  p.fechaEntrega = '—';
+  loadCandela();
+}
+
+function marcarGrupoPedido(proveedor) {
+  pedidos.filter(p => (p.proveedor||'Sin proveedor definido') === proveedor && p.estado === 'pendiente')
+    .forEach(p => { p.estado = 'pedido_realizado'; p.monto = 0; });
+  loadCandela();
+}
+
+function rechazarPedido(id) {
+  const p = pedidos.find(x => x.id === id);
+  if (p) p.estado = 'rechazado';
+  loadCandela();
+}
+
+function marcarEntregado(id) {
+  const p = pedidos.find(x => x.id === id);
+  if (p) p.estado = 'entregado';
+  loadCandela();
+}
+
+function showCTab(tab, btn) {
+  ['pendientes','encamino','historial'].forEach(t => {
+    document.getElementById('ctab-content-'+t).style.display = t===tab ? 'block' : 'none';
+    const b = document.getElementById('ctab-'+t);
+    if (b) b.className = 'itab' + (t===tab?' on':'');
+  });
+}
+
+// ════════════════════════════════
+// PAGOS
+// ════════════════════════════════
+function loadPagos() {
+  const deudaTotal = deudas.reduce((s,d) => s + d.deudaTotal, 0);
+  const pagadoMes  = pagos.reduce((s,p) => s + p.monto, 0);
+  const conDeuda   = deudas.filter(d => d.deudaTotal > 0).length;
+  document.getElementById('kpi-deuda-total').textContent  = fmt(deudaTotal);
+  document.getElementById('kpi-vence-semana').textContent = fmt(95000);
+  document.getElementById('kpi-pagado-mes').textContent   = fmt(pagadoMes);
+  document.getElementById('kpi-provs-activos').textContent= conDeuda;
+  renderDeudas();
+  renderHistorialPagos();
+}
+
+function renderDeudas() {
+  const el = document.getElementById('deuda-list');
+  el.innerHTML = deudas.map(d => {
+    const nivel = d.deudaTotal > 300000 ? 'alto' : d.deudaTotal > 100000 ? 'medio' : 'ok';
+    return `<div class="deuda-card">
+      <div class="deuda-header">
+        <div>
+          <div class="deuda-name">${d.proveedor}</div>
+          <div style="font-size:11px;color:var(--g5)">${d.condicion} · Vence: ${d.vencimiento}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="deuda-total ${nivel}">${fmt(d.deudaTotal)}</div>
+          <div style="font-size:10px;color:var(--g5)">${d.deudaTotal===0?'Sin deuda':'pendiente'}</div>
+        </div>
+      </div>
+      ${d.deudaTotal > 0
+        ? `<button class="btn btn-sm btn-y" onclick="irAPagar('${d.proveedor}')">Registrar pago →</button>`
+        : `<span class="badge bg">✓ Al día</span>`}
+    </div>`;
+  }).join('');
+}
+
+function renderHistorialPagos() {
+  const body = document.getElementById('pagos-historial-body');
+  if (!pagos.length) { body.innerHTML='<tr><td colspan="6" class="empty">Sin pagos registrados</td></tr>'; return; }
+  body.innerHTML = pagos.map(p => `<tr>
+    <td class="mono" style="font-size:10px">${p.fecha}</td>
+    <td style="font-weight:500">${p.proveedor}</td>
+    <td class="mono" style="text-align:right;font-weight:700">${fmt(p.monto)}</td>
+    <td><span class="badge bgr">${p.medio}</span></td>
+    <td style="font-size:11px;color:var(--g5)">${p.registradoPor}</td>
+    <td style="font-size:11px;color:var(--g5)">${p.obs||'—'}</td>
+  </tr>`).join('');
+}
+
+function irAPagar(proveedor) {
+  document.getElementById('pago-prov').value = proveedor;
+  showPTab('pago', document.getElementById('ptab-pago'));
+}
+
+function registrarPago() {
+  const prov  = document.getElementById('pago-prov').value;
+  const monto = parseFloat(document.getElementById('pago-monto').value);
+  const fecha = document.getElementById('pago-fecha').value;
+  const medio = document.getElementById('pago-medio').value;
+  const obs   = document.getElementById('pago-obs').value.trim();
+  if (!prov)           { showAl('al-pago','Seleccioná el proveedor.','err'); return; }
+  if (!monto || monto < 1) { showAl('al-pago','Ingresá el monto pagado.','err'); return; }
+  pagos.unshift({ id:'PAG'+Date.now(), fecha: fecha ? new Date(fecha).toLocaleDateString('es-AR') : toDay(), proveedor:prov, monto, medio, registradoPor:sesion.nombre, obs });
+  const d = deudas.find(x => x.proveedor === prov);
+  if (d) d.deudaTotal = Math.max(0, d.deudaTotal - monto);
+  showAl('al-pago', `Pago de ${fmt(monto)} a ${prov} registrado.`, 'ok');
+  ['pago-monto','pago-obs'].forEach(id => document.getElementById(id).value='');
+  loadPagos();
+}
+
+function showPTab(tab, btn) {
+  ['deuda','pago','historial'].forEach(t => {
+    document.getElementById('ptab-content-'+t).style.display = t===tab ? 'block' : 'none';
+    const b = document.getElementById('ptab-'+t);
+    if (b) b.className = 'itab' + (t===tab?' on':'');
+  });
+}
+
+// ════════════════════════════════
+// ADMIN
+// ════════════════════════════════
+function loadAdmin() {
+  const body = document.getElementById('admin-body');
+  body.innerHTML = pedidos.map(p => `<tr>
+    <td class="mono" style="font-size:10px">${p.fecha}</td>
+    <td><span class="tag-area tag-${areaClass(p.area)}">${p.area}</span></td>
+    <td style="font-size:12px">${p.proveedor||'—'}</td>
+    <td><span class="badge bbl">${p.items.length} ítem${p.items.length>1?'s':''}</span></td>
+    <td><span class="urg-${p.urgenciaMax||'media'}">${urgLabel(p.urgenciaMax||'media')}</span></td>
+    <td>${estadoBadge(p.estado)}</td>
+    <td class="mono" style="text-align:right">${p.monto ? fmt(p.monto) : '—'}</td>
+  </tr>`).join('');
+  const deudaTotal = deudas.reduce((s,d)=>s+d.deudaTotal,0);
+  const pagadoMes  = pagos.reduce((s,p)=>s+p.monto,0);
+  document.getElementById('adm-total').textContent     = pedidos.length;
+  document.getElementById('adm-deuda').textContent     = fmt(deudaTotal);
+  document.getElementById('adm-pagado').textContent    = fmt(pagadoMes);
+  document.getElementById('adm-pendientes').textContent= pedidos.filter(p=>p.estado==='pendiente').length;
+}
+
+// ════════════════════════════════
+// UTILS
+// ════════════════════════════════
+function estadoBadge(e) {
+  const m = { pendiente:'<span class="badge by">Pendiente</span>', pedido_realizado:'<span class="badge bbl">En camino</span>', entregado:'<span class="badge bg">Entregado</span>', rechazado:'<span class="badge br">Rechazado</span>' };
+  return m[e] || `<span class="badge bgr">${e}</span>`;
+}
+function urgLabel(u) { return u==='alta'?'🔴 Urgente':u==='media'?'🟡 Esta semana':'🟢 Sin urgencia'; }
+function urgClass(u) { return u==='alta'?'urgente':u==='media'?'media':'baja'; }
+function areaClass(a) { return a.includes('Helad')?'helados':a.includes('Repos')?'reposteria':'direccion'; }
+function showAl(id, msg, type) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'al al-'+(type==='ok'?'ok':type==='err'?'err':'info')+' on';
+  setTimeout(() => el.className='al', 6000);
+}
+
+// Enter en campo producto agrega ítem
+document.addEventListener('keydown', e => {
+  if (e.key==='Enter' && document.activeElement.id==='item-producto') agregarItem();
+});
+</script>
+</body>
+</html>
