@@ -1,75 +1,1103 @@
-const SS = SpreadsheetApp.getActiveSpreadsheet();
-
-function doGet(e) {
-  return handleAction(e.parameter);
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Porto Gelato - Compras</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --y:#FFD600;--yd:#E6C200;--yp:#FFFBE6;
+  --bk:#1A1A1A;--g7:#4A4A4A;--g5:#888;--g2:#E8E8E8;--g1:#F5F5F5;
+  --wh:#FFFFFF;--gn:#22C55E;--gnp:#DCFCE7;--rd:#EF4444;--rdp:#FEE2E2;
+  --or:#F97316;--orp:#FFF7ED;--bl:#3B82F6;--blp:#DBEAFE;
+  --r:12px;--rs:8px;--sh:0 2px 12px rgba(0,0,0,.08);
 }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--g1);color:var(--bk);min-height:100vh;}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bk);}
+.login-box{background:var(--wh);border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.logo{width:48px;height:48px;background:var(--y);border-radius:10px;display:grid;place-items:center;margin-bottom:16px;font-size:16px;font-weight:700;color:var(--bk);}
+.login-box h1{font-size:20px;font-weight:600;margin-bottom:3px;}
+.login-box p{font-size:13px;color:var(--g5);margin-bottom:24px;}
+.lf{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.lf label{font-size:11px;font-weight:600;color:var(--g5);text-transform:uppercase;letter-spacing:.05em;}
+.lf select,.lf input{border:1.5px solid var(--g2);border-radius:var(--rs);padding:10px 12px;font-family:inherit;font-size:14px;outline:none;transition:border-color .15s;width:100%;}
+.lf select:focus,.lf input:focus{border-color:var(--y);}
+.pass-wrap{position:relative;}
+.pass-wrap input{padding-right:42px;}
+.btn-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px;color:var(--g5);padding:4px;}
+.lerr{background:var(--rdp);color:#DC2626;border-radius:var(--rs);padding:10px 14px;font-size:13px;font-weight:500;margin-bottom:10px;display:none;border-left:3px solid var(--rd);}
+.lerr.on{display:block;}
+.nav{background:var(--bk);padding:0 16px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.3);}
+.nb{display:flex;align-items:center;gap:8px;}
+.ndot{width:28px;height:28px;background:var(--y);border-radius:6px;display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--bk);flex-shrink:0;}
+.ntitle{color:var(--wh);font-size:13px;font-weight:600;}
+.nsub{color:var(--g5);font-size:10px;}
+.ntabs{display:flex;gap:2px;align-items:center;flex-wrap:wrap;}
+.ntab{padding:5px 10px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;color:var(--g5);border:none;background:transparent;font-family:inherit;display:none;white-space:nowrap;}
+.ntab.on{background:var(--y);color:var(--bk);}
+.ntab:hover:not(.on){background:rgba(255,255,255,.08);color:var(--wh);}
+.nav-role{background:rgba(255,255,255,.08);border-radius:20px;padding:2px 8px;font-size:10px;color:var(--g5);margin-right:4px;}
+.btn-logout{background:transparent;border:1px solid #444;color:var(--g5);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit;}
+.btn-logout:hover{border-color:var(--rd);color:var(--rd);}
+.scr{display:none;padding:16px;max-width:1000px;margin:0 auto;}
+.scr.on{display:block;}
+.card{background:var(--wh);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin-bottom:12px;}
+.ch{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap;}
+.ct{font-size:14px;font-weight:600;}
+.cs{font-size:11px;color:var(--g5);margin-top:2px;}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ff{display:flex;flex-direction:column;gap:4px;}
+.ff.full{grid-column:1/-1;}
+.ff label{font-size:11px;font-weight:600;color:var(--g5);text-transform:uppercase;letter-spacing:.05em;}
+.ff input,.ff select,.ff textarea{border:1.5px solid var(--g2);border-radius:var(--rs);padding:9px 10px;font-family:inherit;font-size:13px;outline:none;transition:border-color .15s;background:var(--wh);width:100%;}
+.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--y);}
+.ff textarea{resize:vertical;min-height:60px;}
+.btn{border:none;border-radius:var(--rs);padding:10px 16px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.btn-y{background:var(--y);color:var(--bk);}
+.btn-y:hover{background:var(--yd);}
+.btn-y:disabled{opacity:.45;cursor:not-allowed;}
+.btn-s{background:var(--g1);color:var(--g7);}
+.btn-s:hover{background:var(--g2);}
+.btn-g{background:var(--gnp);color:#15803D;}
+.btn-r{background:var(--rdp);color:#DC2626;}
+.btn-full{width:100%;margin-top:12px;}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.btn-xs{padding:3px 8px;font-size:10px;border-radius:5px;}
+.badge{display:inline-block;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:600;}
+.bg{background:var(--gnp);color:#15803D;}
+.br{background:var(--rdp);color:#DC2626;}
+.by{background:var(--yp);color:#92400E;}
+.bbl{background:var(--blp);color:#1D4ED8;}
+.bgr{background:var(--g2);color:var(--g7);}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+.kpi{background:var(--wh);border-radius:var(--r);padding:14px;box-shadow:var(--sh);}
+.kpi.hi{background:var(--bk);}
+.kpi.warn{background:var(--rdp);border:1.5px solid var(--rd);}
+.kpi.ok{background:var(--gnp);border:1.5px solid var(--gn);}
+.kl{font-size:10px;font-weight:600;color:var(--g5);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+.kv{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--bk);}
+.kpi.hi .kl,.kpi.hi .ks{color:var(--g5);}
+.kpi.hi .kv{color:var(--y);}
+.kpi.warn .kl,.kpi.warn .ks,.kpi.warn .kv{color:#DC2626;}
+.kpi.ok .kl,.kpi.ok .ks,.kpi.ok .kv{color:#15803D;}
+.ks{font-size:10px;color:var(--g5);margin-top:2px;}
+.itabs{display:flex;gap:3px;margin-bottom:12px;background:var(--g2);border-radius:var(--rs);padding:3px;flex-wrap:wrap;}
+.itab{padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--g7);font-family:inherit;}
+.itab.on{background:var(--wh);color:var(--bk);box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.al{border-radius:var(--rs);padding:10px 14px;font-size:12px;font-weight:500;margin-bottom:10px;display:none;border-left:3px solid;}
+.al.on{display:block;}
+.al-ok{background:var(--gnp);color:#15803D;border-color:var(--gn);}
+.al-err{background:var(--rdp);color:#DC2626;border-color:var(--rd);}
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{background:var(--g1);padding:8px 10px;text-align:left;font-size:10px;font-weight:600;color:var(--g5);text-transform:uppercase;border-bottom:1.5px solid var(--g2);white-space:nowrap;}
+tbody td{padding:9px 10px;border-bottom:1px solid var(--g1);vertical-align:middle;}
+tbody tr:hover{background:var(--g1);}
+.mono{font-family:'DM Mono',monospace;font-size:11px;}
+.item-row{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--g1);border-radius:6px;font-size:12px;margin-bottom:4px;}
+.item-row .ir-name{font-weight:500;flex:1;}
+.item-row .ir-qty{font-family:'DM Mono',monospace;color:var(--g7);margin:0 12px;}
+.carrito-empty{text-align:center;padding:20px;color:var(--g5);font-size:12px;background:var(--g1);border-radius:var(--rs);border:1.5px dashed var(--g2);}
+.carrito-total{background:var(--yp);border:1.5px solid var(--y);border-radius:var(--rs);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+.prov-section{background:var(--wh);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin-bottom:12px;}
+.prov-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid var(--y);flex-wrap:wrap;gap:8px;}
+.prov-name{font-size:15px;font-weight:700;}
+.prov-cond{font-size:11px;color:var(--g5);margin-top:2px;}
+.pedido-bloque{background:var(--g1);border-radius:var(--rs);padding:12px;margin-bottom:8px;}
+.deuda-card{background:var(--wh);border-radius:var(--r);padding:14px;box-shadow:var(--sh);margin-bottom:8px;}
+.deuda-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+.deuda-name{font-size:14px;font-weight:600;}
+.deuda-total{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;}
+.deuda-total.alto{color:var(--rd);}
+.deuda-total.medio{color:var(--or);}
+.deuda-total.ok{color:var(--gn);}
+.tag-area{display:inline-block;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:600;}
+.tag-h{background:#DBEAFE;color:#1D4ED8;}
+.tag-r{background:#EDE9FE;color:#6D28D9;}
+.tag-d{background:#FFF7ED;color:#C2410C;}
+.empty{text-align:center;padding:24px;color:var(--g5);font-size:12px;}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid var(--g2);border-top-color:var(--bk);border-radius:50%;animation:spn .6s linear infinite;}
+@keyframes spn{to{transform:rotate(360deg)}}
+@media(max-width:640px){
+  .kpis{grid-template-columns:1fr 1fr;}
+  .fg{grid-template-columns:1fr;}
+  .scr{padding:12px;}
+}
+</style>
+</head>
+<body>
 
-function handleAction(data) {
-  const action = data.action;
+<!-- LOGIN -->
+<div id="pg-login" class="login-wrap">
+  <div class="login-box">
+    <div class="logo">PG</div>
+    <h1>Porto Gelato</h1>
+    <p>Gestion de Compras</p>
+    <div class="lerr" id="login-err">Usuario o contrasena incorrectos.</div>
+    <div class="lf">
+      <label>Usuario</label>
+      <select id="login-user">
+        <option value="">- Selecciona tu usuario -</option>
+        <option value="helados">Jefe Fabrica Helados</option>
+        <option value="reposteria">Jefa Fabrica Reposteria</option>
+        <option value="direccion">Direccion</option>
+        <option value="candela">Candela - Compras</option>
+        <option value="santiago">Santiago - Pagos</option>
+        <option value="admin">Administrador</option>
+      </select>
+    </div>
+    <div class="lf">
+      <label>Contrasena</label>
+      <div class="pass-wrap">
+        <input type="password" id="login-pass" placeholder="......" onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="btn-eye" onclick="togglePass()">ver</button>
+      </div>
+    </div>
+    <button class="btn btn-y btn-full" onclick="doLogin()" style="margin-top:0">Ingresar</button>
+  </div>
+</div>
 
-  if (action === 'getPedidos') {
-    const sheet = SS.getSheetByName('Pedidos');
-    const rows = sheet.getDataRange().getValues();
-    if (rows.length < 2) return json({ok:true, pedidos:[]});
-    const h = rows[0];
-    return json({ok:true, pedidos: rows.slice(1).map(r => obj(h,r))});
-  }
+<!-- APP -->
+<div id="pg-app" style="display:none">
+<nav class="nav">
+  <div class="nb">
+    <div class="ndot">PG</div>
+    <div><div class="ntitle">Compras</div><div class="nsub" id="nav-user">-</div></div>
+  </div>
+  <div class="ntabs">
+    <span class="nav-role" id="nav-role"></span>
+    <button class="ntab" id="ntab-nuevo" onclick="showScr('nuevo',this)">Nuevo pedido</button>
+    <button class="ntab" id="ntab-mispedidos" onclick="showScr('mispedidos',this)">Mis pedidos</button>
+    <button class="ntab" id="ntab-candela" onclick="showScr('candela',this)">Gestion compras</button>
+    <button class="ntab" id="ntab-pagos" onclick="showScr('pagos',this)">Pagos</button>
+    <button class="ntab" id="ntab-admin" onclick="showScr('admin',this)">Admin</button>
+    <button class="btn-logout" onclick="doLogout()">Salir</button>
+  </div>
+</nav>
 
-  if (action === 'nuevoPedido') {
-    const sheet = SS.getSheetByName('Pedidos');
-    if (sheet.getLastRow() === 0)
-      sheet.appendRow(['ID','Fecha','Hora','Area','Solicitante','Proveedor','Items','Obs','Estado','Monto','FechaEntrega']);
-    sheet.appendRow([
-      data.id, data.fecha, data.hora, data.area, data.solicitante,
-      data.proveedor, data.items, data.obs, 'pendiente', 0, ''
-    ]);
-    return json({ok:true, msg:'Pedido guardado'});
-  }
+<!-- NUEVO PEDIDO -->
+<div id="scr-nuevo" class="scr">
+  <div class="card">
+    <div class="ch"><div><div class="ct">Nuevo pedido</div><div class="cs">Agrega todos los insumos y envia un solo pedido a Candela</div></div></div>
+    <div id="al-nuevo" class="al"></div>
+    <div class="fg" style="margin-bottom:12px">
+      <div class="ff"><label>Area solicitante</label><input id="p-area" readonly style="background:var(--g1);color:var(--g7)"></div>
+      <div class="ff"><label>Proveedor sugerido (opcional)</label>
+        <select id="p-prov">
+          <option value="">- Que lo defina Candela -</option>
+          <option>La Serenisima</option>
+          <option>Molinos Rio de la Plata</option>
+          <option>Arcor</option>
+          <option>Distribuidora Norte</option>
+          <option>El Trigal</option>
+          <option>Otros</option>
+        </select>
+      </div>
+    </div>
+    <div class="card" style="background:var(--g1);box-shadow:none;border:1.5px solid var(--g2)">
+      <div class="ct" style="margin-bottom:10px">Agregar item al pedido</div>
+      <div class="fg">
+        <div class="ff full"><label>Producto / Insumo</label><input id="item-producto" placeholder="Ej: Leche en polvo, Azucar, Neutro..."></div>
+        <div class="ff"><label>Cantidad</label><input type="number" id="item-cantidad" placeholder="Ej: 50" min="0"></div>
+        <div class="ff"><label>Unidad</label>
+          <select id="item-unidad">
+            <option value="kg">kg</option>
+            <option value="litros">litros</option>
+            <option value="unidades">unidades</option>
+            <option value="cajas">cajas</option>
+            <option value="bolsas">bolsas</option>
+            <option value="fardos">fardos</option>
+            <option value="latas">latas</option>
+          </select>
+        </div>
+        <div class="ff"><label>Urgencia</label>
+          <select id="item-urgencia">
+            <option value="alta">URGENTE - hoy o manana</option>
+            <option value="media" selected>Esta semana</option>
+            <option value="baja">Sin urgencia</option>
+          </select>
+        </div>
+        <div class="ff"><label>Obs. del item</label><input id="item-obs" placeholder="Ej: igual al anterior"></div>
+        <div class="ff" style="justify-content:flex-end"><label style="opacity:0">x</label><button class="btn btn-y" onclick="agregarItem()" style="width:100%">+ Agregar</button></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px">
+      <span style="font-size:13px;font-weight:600">Items del pedido</span>
+      <button class="btn btn-xs btn-r" onclick="limpiarCarrito()" id="btn-limpiar" style="display:none">Limpiar todo</button>
+    </div>
+    <div id="carrito-list"><div class="carrito-empty">Sin items. Completa el formulario y hace clic en Agregar.</div></div>
+    <div id="carrito-resumen" style="display:none" class="carrito-total">
+      <span style="font-size:13px;font-weight:600">Total de items</span>
+      <span style="font-family:'DM Mono',monospace;font-size:20px;font-weight:700" id="carrito-count">0</span>
+    </div>
+    <div class="ff full" style="margin-top:12px"><label>Observaciones generales</label><textarea id="p-obs" placeholder="Ej: Necesito todo junto, factura A, etc."></textarea></div>
+    <button class="btn btn-y btn-full" id="btn-enviar" onclick="enviarPedido()">Enviar pedido a Candela</button>
+  </div>
+</div>
 
-  if (action === 'actualizarEstado') {
-    const sheet = SS.getSheetByName('Pedidos');
-    const values = sheet.getDataRange().getValues();
-    for (let i = 1; i < values.length; i++) {
-      if (String(values[i][0]) === String(data.id)) {
-        sheet.getRange(i+1, 9).setValue(data.estado);
-        if (data.monto) sheet.getRange(i+1, 10).setValue(data.monto);
-        if (data.fechaEntrega) sheet.getRange(i+1, 11).setValue(data.fechaEntrega);
-        return json({ok:true, msg:'Actualizado'});
-      }
+<!-- MIS PEDIDOS -->
+<div id="scr-mispedidos" class="scr">
+  <div class="card">
+    <div class="ch"><div><div class="ct">Mis pedidos</div></div><button class="btn btn-sm btn-s" onclick="loadMisPedidos()">Actualizar</button></div>
+    <div id="mis-pedidos-list"><div class="empty">Cargando...</div></div>
+  </div>
+</div>
+
+<!-- CANDELA -->
+<div id="scr-candela" class="scr">
+  <div class="kpis">
+    <div class="kpi hi"><div class="kl">Pedidos pendientes</div><div class="kv" id="kpi-pendientes">-</div><div class="ks">sin gestionar</div></div>
+    <div class="kpi warn"><div class="kl">Urgentes</div><div class="kv" id="kpi-urgentes">-</div><div class="ks">para hoy/manana</div></div>
+    <div class="kpi"><div class="kl">En camino</div><div class="kv" id="kpi-encamino">-</div><div class="ks">pedido realizado</div></div>
+    <div class="kpi ok"><div class="kl">Entregados</div><div class="kv" id="kpi-entregados">-</div><div class="ks">recibidos ok</div></div>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="kl">Items pendientes</div><div class="kv" id="kpi-items">-</div><div class="ks">total insumos</div></div>
+    <div class="kpi"><div class="kl">Areas activas</div><div class="kv" id="kpi-areas">-</div><div class="ks">con pedidos</div></div>
+    <div class="kpi"><div class="kl">Proveedores a contactar</div><div class="kv" id="kpi-provs-c">-</div><div class="ks">distintos</div></div>
+    <div class="kpi"><div class="kl">Pedidos este mes</div><div class="kv" id="kpi-mes">-</div><div class="ks">total del mes</div></div>
+  </div>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:8px;gap:8px">
+    <button class="btn btn-sm btn-s" onclick="loadCandela()">Actualizar</button>
+    <button class="btn btn-sm btn-g" onclick="exportarCandela()">Exportar Excel</button>
+  </div>
+  <div class="itabs">
+    <button class="itab on" id="ctab-pend" onclick="showCTab('pend',this)">Pendientes</button>
+    <button class="itab" id="ctab-enc" onclick="showCTab('enc',this)">En camino</button>
+    <button class="itab" id="ctab-hist" onclick="showCTab('hist',this)">Historial</button>
+  </div>
+  <div id="ctab-pend-content">
+    <div id="candela-list"><div class="empty">Cargando...</div></div>
+  </div>
+  <div id="ctab-enc-content" style="display:none">
+    <div class="card">
+      <div class="ct" style="margin-bottom:12px">En camino - esperando entrega</div>
+      <div class="tw"><table>
+        <thead><tr><th>Fecha</th><th>Area</th><th>Proveedor</th><th>Items</th><th>Entrega est.</th><th>Accion</th></tr></thead>
+        <tbody id="enc-body"><tr><td colspan="6" class="empty">Sin pedidos en camino</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+  <div id="ctab-hist-content" style="display:none">
+    <div class="card">
+      <div class="ct" style="margin-bottom:12px">Historial completo</div>
+      <div class="tw"><table>
+        <thead><tr><th>Fecha</th><th>Area</th><th>Proveedor</th><th>Items</th><th>Estado</th><th>Monto</th></tr></thead>
+        <tbody id="hist-body"><tr><td colspan="6" class="empty">Sin historial</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGOS -->
+<div id="scr-pagos" class="scr">
+  <div class="kpis">
+    <div class="kpi warn"><div class="kl">Deuda total</div><div class="kv mono" id="kpi-deuda">-</div><div class="ks">todos los proveedores</div></div>
+    <div class="kpi"><div class="kl">Proveedores con deuda</div><div class="kv" id="kpi-con-deuda">-</div><div class="ks">pendientes</div></div>
+    <div class="kpi ok"><div class="kl">Pagado este mes</div><div class="kv mono" id="kpi-pagado">-</div><div class="ks">total abonado</div></div>
+    <div class="kpi"><div class="kl">Cantidad de pagos</div><div class="kv" id="kpi-cant-pag">-</div><div class="ks">este mes</div></div>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="kl">Mayor deuda</div><div class="kv" id="kpi-mayor">-</div><div class="ks">prioridad de pago</div></div>
+    <div class="kpi ok"><div class="kl">Proveedores al dia</div><div class="kv" id="kpi-al-dia">-</div><div class="ks">sin deuda</div></div>
+    <div class="kpi"><div class="kl">Ticket promedio</div><div class="kv mono" id="kpi-ticket">-</div><div class="ks">por pago</div></div>
+    <div class="kpi"><div class="kl"> </div><div class="kv"> </div></div>
+  </div>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+    <button class="btn btn-sm btn-g" onclick="exportarPagos()">Exportar Excel</button>
+  </div>
+  <div class="itabs">
+    <button class="itab on" id="ptab-deuda" onclick="showPTab('deuda',this)">Deuda por proveedor</button>
+    <button class="itab" id="ptab-saldo" onclick="showPTab('saldo',this)">Saldo inicial</button>
+    <button class="itab" id="ptab-pago" onclick="showPTab('pago',this)">Registrar pago</button>
+    <button class="itab" id="ptab-histp" onclick="showPTab('histp',this)">Historial pagos</button>
+  </div>
+  <div id="ptab-deuda-content">
+    <div id="deuda-list"><div class="empty">Cargando...</div></div>
+  </div>
+  <div id="ptab-saldo-content" style="display:none">
+    <div class="card">
+      <div class="ch"><div><div class="ct">Saldo inicial por proveedor</div><div class="cs">Carga la deuda actual para arrancar desde cero real</div></div></div>
+      <div id="al-saldo" class="al"></div>
+      <div class="fg">
+        <div class="ff full"><label>Proveedor</label>
+          <select id="si-prov">
+            <option value="">- Selecciona -</option>
+            <option>La Serenisima</option>
+            <option>Molinos Rio de la Plata</option>
+            <option>Arcor</option>
+            <option>Distribuidora Norte</option>
+            <option>El Trigal</option>
+            <option>Otros</option>
+          </select>
+        </div>
+        <div class="ff"><label>Deuda actual ($)</label><input type="number" id="si-monto" placeholder="Ej: 420000" min="0"></div>
+        <div class="ff"><label>Vencimiento</label><input type="date" id="si-venc"></div>
+        <div class="ff full"><label>Condicion de pago</label>
+          <select id="si-cond">
+            <option>Cuenta corriente 30 dias</option>
+            <option>Cuenta corriente 15 dias</option>
+            <option>Contado</option>
+            <option>Variable</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-y btn-full" onclick="guardarSaldoInicial()">Guardar saldo inicial</button>
+    </div>
+    <div class="card">
+      <div class="ct" style="margin-bottom:12px">Saldos cargados</div>
+      <div class="tw"><table>
+        <thead><tr><th>Proveedor</th><th style="text-align:right">Deuda inicial</th><th>Vencimiento</th><th>Condicion</th><th>Accion</th></tr></thead>
+        <tbody id="saldo-inicial-body"><tr><td colspan="5" class="empty">Sin saldos cargados</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+  <div id="ptab-pago-content" style="display:none">
+    <div class="card">
+      <div class="ch"><div class="ct">Registrar pago</div></div>
+      <div id="al-pago" class="al"></div>
+      <div class="fg">
+        <div class="ff full"><label>Proveedor</label>
+          <select id="pago-prov">
+            <option value="">- Selecciona -</option>
+            <option>La Serenisima</option>
+            <option>Molinos Rio de la Plata</option>
+            <option>Arcor</option>
+            <option>Distribuidora Norte</option>
+            <option>El Trigal</option>
+            <option>Otros</option>
+          </select>
+        </div>
+        <div class="ff"><label>Monto ($)</label><input type="number" id="pago-monto" placeholder="Ej: 150000" min="0"></div>
+        <div class="ff"><label>Fecha</label><input type="date" id="pago-fecha"></div>
+        <div class="ff full"><label>Medio de pago</label>
+          <select id="pago-medio">
+            <option>Transferencia</option>
+            <option>Cheque</option>
+            <option>Efectivo</option>
+            <option>Debito</option>
+          </select>
+        </div>
+        <div class="ff full"><label>Observaciones</label><input id="pago-obs" placeholder="Ej: N transferencia, pago parcial..."></div>
+      </div>
+      <button class="btn btn-y btn-full" onclick="registrarPago()">Confirmar pago</button>
+    </div>
+  </div>
+  <div id="ptab-histp-content" style="display:none">
+    <div class="card">
+      <div class="ct" style="margin-bottom:12px">Historial de pagos</div>
+      <div class="tw"><table>
+        <thead><tr><th>Fecha</th><th>Proveedor</th><th style="text-align:right">Monto</th><th>Medio</th><th>Por</th><th>Obs.</th></tr></thead>
+        <tbody id="pagos-body"><tr><td colspan="6" class="empty">Sin pagos</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="scr-admin" class="scr">
+  <div class="kpis">
+    <div class="kpi hi"><div class="kl">Total pedidos</div><div class="kv" id="adm-total">-</div><div class="ks">todos los estados</div></div>
+    <div class="kpi warn"><div class="kl">Deuda proveedores</div><div class="kv mono" id="adm-deuda">-</div><div class="ks">total pendiente</div></div>
+    <div class="kpi ok"><div class="kl">Pagado este mes</div><div class="kv mono" id="adm-pagado">-</div><div class="ks">abonado</div></div>
+    <div class="kpi"><div class="kl">Pendientes</div><div class="kv" id="adm-pend">-</div><div class="ks">sin gestionar</div></div>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="kl">Items totales</div><div class="kv" id="adm-items">-</div><div class="ks">insumos solicitados</div></div>
+    <div class="kpi"><div class="kl">Area mas activa</div><div class="kv" id="adm-area">-</div><div class="ks">mas pedidos</div></div>
+    <div class="kpi"><div class="kl">Proveedor mas usado</div><div class="kv" id="adm-prov">-</div><div class="ks">mas pedidos</div></div>
+    <div class="kpi ok"><div class="kl">Tasa entrega</div><div class="kv" id="adm-tasa">-</div><div class="ks">pedidos entregados</div></div>
+  </div>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+    <button class="btn btn-sm btn-g" onclick="exportarAdmin()">Exportar Excel completo</button>
+  </div>
+  <div class="card">
+    <div class="ch"><div class="ct">Todos los pedidos</div><button class="btn btn-sm btn-s" onclick="loadAdmin()">Actualizar</button></div>
+    <div class="tw"><table>
+      <thead><tr><th>Fecha</th><th>Area</th><th>Proveedor</th><th>Items</th><th>Urgencia</th><th>Estado</th><th>Monto</th></tr></thead>
+      <tbody id="admin-body"><tr><td colspan="7" class="empty">Cargando...</td></tr></tbody>
+    </table></div>
+  </div>
+</div>
+</div>
+
+<script>
+var API_URL = 'https://script.google.com/macros/s/AKfycbxXKnpp6ywDO6ApP_eFUxa-KSV2wHDkqoT6J6mqO3kQcZL1zTA8TH_8Dws3CNiqsNcs/exec';
+
+var USUARIOS = {
+  helados:    {pass:'hel2026', rol:'solicitante', nombre:'Jefe Helados',    area:'Fabrica Helados'},
+  reposteria: {pass:'rep2026', rol:'solicitante', nombre:'Jefa Reposteria', area:'Fabrica Reposteria'},
+  direccion:  {pass:'dir2026', rol:'solicitante', nombre:'Direccion',        area:'Direccion'},
+  candela:    {pass:'can2026', rol:'candela',     nombre:'Candela',          area:'Compras'},
+  santiago:   {pass:'san2026', rol:'santiago',    nombre:'Santiago',         area:'Pagos'},
+  admin:      {pass:'adm2026', rol:'admin',       nombre:'Administrador',    area:'Admin'}
+};
+
+var sesion = null;
+var carrito = [];
+var pedidos = [];
+var pagos = [];
+var deudas = [];
+var saldosIniciales = [];
+
+function fmt(n) { return '$' + Math.round(n).toLocaleString('es-AR'); }
+function toDay() { return new Date().toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit', year:'numeric'}); }
+function toTime() { return new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'}); }
+function genId() { return 'P' + Date.now().toString().slice(-6); }
+
+// Restaurar sesion al recargar
+window.addEventListener('load', function() {
+  var saved = localStorage.getItem('pg_compras_sesion');
+  if (saved) {
+    try {
+      sesion = JSON.parse(saved);
+      iniciarApp();
+    } catch(e) {
+      localStorage.removeItem('pg_compras_sesion');
     }
-    return json({ok:false, error:'Pedido no encontrado'});
   }
+});
 
-  if (action === 'getPagos') {
-    const sheet = SS.getSheetByName('Pagos');
-    const rows = sheet.getDataRange().getValues();
-    if (rows.length < 2) return json({ok:true, pagos:[]});
-    const h = rows[0];
-    return json({ok:true, pagos: rows.slice(1).map(r => obj(h,r))});
+function togglePass() {
+  var input = document.getElementById('login-pass');
+  var btn = document.querySelector('.btn-eye');
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = 'ocultar';
+  } else {
+    input.type = 'password';
+    btn.textContent = 'ver';
   }
-
-  if (action === 'nuevoPago') {
-    const sheet = SS.getSheetByName('Pagos');
-    if (sheet.getLastRow() === 0)
-      sheet.appendRow(['ID','Fecha','Proveedor','Monto','Medio','RegistradoPor','Obs']);
-    sheet.appendRow([
-      data.id, data.fecha, data.proveedor,
-      data.monto, data.medio, data.registradoPor, data.obs
-    ]);
-    return json({ok:true, msg:'Pago registrado'});
-  }
-
-  return json({ok:false, error:'Accion desconocida'});
 }
 
-function obj(headers, row) {
-  const o = {};
-  headers.forEach((h, i) => o[h] = row[i]);
-  return o;
+function doLogin() {
+  var uid = document.getElementById('login-user').value;
+  var pass = document.getElementById('login-pass').value;
+  var err = document.getElementById('login-err');
+  if (!uid) { err.textContent = 'Selecciona tu usuario.'; err.classList.add('on'); return; }
+  var u = USUARIOS[uid];
+  if (!u || pass !== u.pass) { err.textContent = 'Contrasena incorrecta.'; err.classList.add('on'); return; }
+  err.classList.remove('on');
+  sesion = {id: uid, pass: u.pass, rol: u.rol, nombre: u.nombre, area: u.area};
+  localStorage.setItem('pg_compras_sesion', JSON.stringify(sesion));
+  iniciarApp();
 }
 
-function json(data) {
-  return ContentService
-    .createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON);
+function iniciarApp() {
+  document.getElementById('pg-login').style.display = 'none';
+  document.getElementById('pg-app').style.display = 'block';
+  document.getElementById('nav-user').textContent = sesion.nombre;
+  document.getElementById('nav-role').textContent = sesion.area;
+  document.getElementById('p-area').value = sesion.area;
+  document.getElementById('pago-fecha').value = new Date().toISOString().split('T')[0];
+  var tabMap = {
+    solicitante: ['ntab-nuevo','ntab-mispedidos'],
+    candela:     ['ntab-nuevo','ntab-mispedidos','ntab-candela'],
+    santiago:    ['ntab-pagos'],
+    admin:       ['ntab-nuevo','ntab-mispedidos','ntab-candela','ntab-pagos','ntab-admin']
+  };
+  document.querySelectorAll('.ntab').forEach(function(t) { t.style.display = 'none'; });
+  var tabs = tabMap[sesion.rol] || [];
+  tabs.forEach(function(id) { document.getElementById(id).style.display = 'inline-flex'; });
+  var primera = tabs[0].replace('ntab-', '');
+  showScr(primera, document.getElementById(tabs[0]));
 }
+
+function doLogout() {
+  sesion = null;
+  carrito = [];
+  localStorage.removeItem('pg_compras_sesion');
+  document.getElementById('pg-app').style.display = 'none';
+  document.getElementById('pg-login').style.display = 'flex';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-err').classList.remove('on');
+}
+
+function showScr(id, btn) {
+  document.querySelectorAll('.scr').forEach(function(e) { e.classList.remove('on'); });
+  document.querySelectorAll('.ntab').forEach(function(e) { e.classList.remove('on'); });
+  document.getElementById('scr-' + id).classList.add('on');
+  if (btn) btn.classList.add('on');
+  if (id === 'candela') loadCandela();
+  if (id === 'mispedidos') loadMisPedidos();
+  if (id === 'pagos') loadPagos();
+  if (id === 'admin') loadAdmin();
+}
+
+function agregarItem() {
+  var prod = document.getElementById('item-producto').value.trim();
+  var cant = parseFloat(document.getElementById('item-cantidad').value);
+  var uni = document.getElementById('item-unidad').value;
+  var urg = document.getElementById('item-urgencia').value;
+  var obs = document.getElementById('item-obs').value.trim();
+  if (!prod) { showAl('al-nuevo', 'Ingresa el nombre del producto.', 'err'); return; }
+  if (!cant || cant <= 0) { showAl('al-nuevo', 'Ingresa la cantidad.', 'err'); return; }
+  carrito.push({id: Date.now(), producto: prod, cantidad: cant, unidad: uni, urgencia: urg, obs: obs});
+  document.getElementById('item-producto').value = '';
+  document.getElementById('item-cantidad').value = '';
+  document.getElementById('item-obs').value = '';
+  document.getElementById('item-urgencia').value = 'media';
+  document.getElementById('item-producto').focus();
+  renderCarrito();
+}
+
+function quitarItem(id) {
+  carrito = carrito.filter(function(i) { return i.id !== id; });
+  renderCarrito();
+}
+
+function limpiarCarrito() {
+  carrito = [];
+  renderCarrito();
+}
+
+function renderCarrito() {
+  var el = document.getElementById('carrito-list');
+  var res = document.getElementById('carrito-resumen');
+  var btn = document.getElementById('btn-limpiar');
+  if (!carrito.length) {
+    el.innerHTML = '<div class="carrito-empty">Sin items. Completa el formulario y hace clic en Agregar.</div>';
+    res.style.display = 'none';
+    btn.style.display = 'none';
+    return;
+  }
+  btn.style.display = 'inline-flex';
+  res.style.display = 'flex';
+  document.getElementById('carrito-count').textContent = carrito.length + (carrito.length === 1 ? ' item' : ' items');
+  var html = '';
+  carrito.forEach(function(item) {
+    html += '<div class="item-row">';
+    html += '<div class="ir-name">' + item.producto;
+    if (item.obs) html += ' <span style="color:var(--g5);font-size:10px">- ' + item.obs + '</span>';
+    html += '</div>';
+    html += '<div class="ir-qty">' + item.cantidad + ' ' + item.unidad + '</div>';
+    html += '<span style="font-size:10px;color:' + (item.urgencia==='alta'?'#DC2626':item.urgencia==='media'?'#D97706':'#15803D') + '">' + urgLabel(item.urgencia) + '</span>';
+    html += '<button class="btn btn-xs btn-r" onclick="quitarItem(' + item.id + ')" style="margin-left:8px">x</button>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+async function enviarPedido() {
+  if (!carrito.length) { showAl('al-nuevo', 'Agrega al menos un item.', 'err'); return; }
+  var urgMax = carrito.some(function(i){return i.urgencia==='alta';}) ? 'alta' :
+               carrito.some(function(i){return i.urgencia==='media';}) ? 'media' : 'baja';
+  var nuevo = {
+    id: genId(), fecha: toDay(), hora: toTime(),
+    area: sesion.area, solicitante: sesion.nombre,
+    proveedor: document.getElementById('p-prov').value,
+    obs: document.getElementById('p-obs').value.trim(),
+    estado: 'pendiente', monto: 0,
+    items: carrito.slice(),
+    urgenciaMax: urgMax
+  };
+  var btn = document.getElementById('btn-enviar');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Enviando...';
+  try {
+    var r = await apiCall({action:'nuevoPedido', id:nuevo.id, fecha:nuevo.fecha, hora:nuevo.hora,
+      area:nuevo.area, solicitante:nuevo.solicitante, proveedor:nuevo.proveedor,
+      obs:nuevo.obs, items:JSON.stringify(nuevo.items)});
+    if (!r.ok) { showAl('al-nuevo', r.error || 'Error al guardar.', 'err'); return; }
+    pedidos.unshift(nuevo);
+    carrito = [];
+    renderCarrito();
+    document.getElementById('p-prov').value = '';
+    document.getElementById('p-obs').value = '';
+    showAl('al-nuevo', 'Pedido enviado con ' + nuevo.items.length + ' items - Candela lo recibio.', 'ok');
+  } catch(e) {
+    showAl('al-nuevo', 'Error de conexion. Intenta de nuevo.', 'err');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Enviar pedido a Candela';
+  }
+}
+
+async function loadMisPedidos() {
+  try {
+    var d = await apiCall({action:'getPedidos'});
+    if (d.ok) pedidos = parsePedidos(d.pedidos || []);
+  } catch(e) {}
+  var el = document.getElementById('mis-pedidos-list');
+  var mis = pedidos.filter(function(p) { return p.area === sesion.area; });
+  if (!mis.length) { el.innerHTML = '<div class="empty">No tenes pedidos aun</div>'; return; }
+  var html = '';
+  mis.forEach(function(p) {
+    var color = p.urgenciaMax==='alta'?'var(--rd)':p.urgenciaMax==='media'?'var(--or)':'var(--gn)';
+    html += '<div class="card" style="border-left:4px solid ' + color + '">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">';
+    html += '<div><div style="font-size:14px;font-weight:600">Pedido ' + p.id + ' - ' + p.items.length + ' items</div>';
+    html += '<div style="font-size:11px;color:var(--g5)">' + p.fecha + ' ' + p.hora;
+    if (p.proveedor) html += ' - ' + p.proveedor;
+    html += '</div>';
+    if (p.obs) html += '<div style="font-size:11px;color:var(--g5);font-style:italic">"' + p.obs + '"</div>';
+    html += '</div>' + estadoBadge(p.estado) + '</div>';
+    p.items.forEach(function(i) {
+      html += '<div class="item-row">';
+      html += '<div class="ir-name">' + i.producto;
+      if (i.obs) html += ' <span style="color:var(--g5);font-size:10px">- ' + i.obs + '</span>';
+      html += '</div><div class="ir-qty">' + i.cantidad + ' ' + i.unidad + '</div>';
+      html += '<span style="font-size:10px;color:' + (i.urgencia==='alta'?'#DC2626':i.urgencia==='media'?'#D97706':'#15803D') + '">' + urgLabel(i.urgencia) + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+async function loadCandela() {
+  try {
+    var d = await apiCall({action:'getPedidos'});
+    if (d.ok) pedidos = parsePedidos(d.pedidos || []);
+  } catch(e) {}
+  var pends = pedidos.filter(function(p){return p.estado==='pendiente';});
+  var enc = pedidos.filter(function(p){return p.estado==='pedido_realizado';});
+  var urg = pends.filter(function(p){return p.items.some(function(i){return i.urgencia==='alta';});});
+  var entregados = pedidos.filter(function(p){return p.estado==='entregado';});
+  document.getElementById('kpi-pendientes').textContent = pends.length;
+  document.getElementById('kpi-urgentes').textContent = urg.length;
+  document.getElementById('kpi-encamino').textContent = enc.length;
+  document.getElementById('kpi-entregados').textContent = entregados.length;
+  var totalItems = pends.reduce(function(s,p){return s+(p.items||[]).length;}, 0);
+  var areas = {};
+  pends.forEach(function(p){areas[p.area]=1;});
+  var provs = {};
+  pends.forEach(function(p){if(p.proveedor)provs[p.proveedor]=1;});
+  document.getElementById('kpi-items').textContent = totalItems;
+  document.getElementById('kpi-areas').textContent = Object.keys(areas).length;
+  document.getElementById('kpi-provs-c').textContent = Object.keys(provs).length;
+  document.getElementById('kpi-mes').textContent = pedidos.length;
+  renderPendientesCandela(pends);
+  renderEncamino(enc);
+  renderHistCandela();
+}
+
+function renderPendientesCandela(pends) {
+  var el = document.getElementById('candela-list');
+  if (!pends.length) { el.innerHTML = '<div class="empty">Sin pedidos pendientes</div>'; return; }
+  var grupos = {};
+  pends.forEach(function(p) {
+    var key = p.proveedor || 'Sin proveedor';
+    if (!grupos[key]) grupos[key] = [];
+    grupos[key].push(p);
+  });
+  var html = '';
+  Object.keys(grupos).forEach(function(prov) {
+    var items = grupos[prov];
+    var totalIt = items.reduce(function(s,p){return s+(p.items||[]).length;}, 0);
+    html += '<div class="prov-section">';
+    html += '<div class="prov-header">';
+    html += '<div><div class="prov-name">' + prov + '</div>';
+    html += '<div class="prov-cond">' + items.length + ' pedido(s) - ' + totalIt + ' item(s)</div></div>';
+    html += '<button class="btn btn-sm btn-y" onclick="marcarGrupo(\'' + prov + '\')">Marcar todo como pedido</button>';
+    html += '</div>';
+    items.forEach(function(p) {
+      var color = p.items.some(function(i){return i.urgencia==='alta';}) ? 'var(--rd)' : 'var(--or)';
+      html += '<div class="pedido-bloque" style="border-left:3px solid ' + color + '">';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">';
+      html += '<div><span class="tag-area ' + areaClass(p.area) + '">' + p.area + '</span>';
+      html += '<span style="font-size:11px;color:var(--g5);margin-left:8px">' + p.solicitante + ' - ' + p.fecha + ' ' + p.hora + '</span>';
+      if (p.obs) html += '<div style="font-size:11px;color:var(--g5);font-style:italic">"' + p.obs + '"</div>';
+      html += '</div>';
+      html += '<div style="display:flex;gap:6px;align-items:center">';
+      html += '<input type="number" placeholder="Monto $" id="monto-' + p.id + '" style="width:120px;border:1.5px solid var(--g2);border-radius:6px;padding:6px 8px;font-size:12px;outline:none">';
+      html += '<button class="btn btn-sm btn-g" onclick="marcarPedido(\'' + p.id + '\')">Pedido</button>';
+      html += '<button class="btn btn-sm btn-r" onclick="rechazarPedido(\'' + p.id + '\')">x</button>';
+      html += '</div></div>';
+      p.items.forEach(function(i) {
+        html += '<div class="item-row" style="background:var(--wh)">';
+        html += '<div class="ir-name">' + i.producto;
+        if (i.obs) html += ' <span style="color:var(--g5);font-size:10px">- ' + i.obs + '</span>';
+        html += '</div><div class="ir-qty">' + i.cantidad + ' ' + i.unidad + '</div>';
+        html += '<span style="font-size:10px;color:' + (i.urgencia==='alta'?'#DC2626':i.urgencia==='media'?'#D97706':'#15803D') + '">' + urgLabel(i.urgencia) + '</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function renderEncamino(enc) {
+  var body = document.getElementById('enc-body');
+  if (!enc.length) { body.innerHTML = '<tr><td colspan="6" class="empty">Sin pedidos en camino</td></tr>'; return; }
+  var html = '';
+  enc.forEach(function(p) {
+    html += '<tr>';
+    html += '<td class="mono" style="font-size:10px">' + p.fecha + '</td>';
+    html += '<td><span class="tag-area ' + areaClass(p.area) + '">' + p.area + '</span></td>';
+    html += '<td>' + (p.proveedor||'-') + '</td>';
+    html += '<td><span class="badge bbl">' + p.items.length + ' item(s)</span></td>';
+    html += '<td class="mono" style="font-size:10px">' + (p.fechaEntrega||'-') + '</td>';
+    html += '<td><button class="btn btn-sm btn-g" onclick="marcarEntregado(\'' + p.id + '\')">Entregado</button></td>';
+    html += '</tr>';
+  });
+  body.innerHTML = html;
+}
+
+function renderHistCandela() {
+  var body = document.getElementById('hist-body');
+  var todos = pedidos.filter(function(p){return p.estado !== 'pendiente';});
+  if (!todos.length) { body.innerHTML = '<tr><td colspan="6" class="empty">Sin historial</td></tr>'; return; }
+  var html = '';
+  todos.forEach(function(p) {
+    html += '<tr>';
+    html += '<td class="mono" style="font-size:10px">' + p.fecha + '</td>';
+    html += '<td><span class="tag-area ' + areaClass(p.area) + '">' + p.area + '</span></td>';
+    html += '<td>' + (p.proveedor||'-') + '</td>';
+    html += '<td>' + p.items.length + ' item(s)</td>';
+    html += '<td>' + estadoBadge(p.estado) + '</td>';
+    html += '<td class="mono" style="text-align:right">' + (p.monto ? fmt(p.monto) : '-') + '</td>';
+    html += '</tr>';
+  });
+  body.innerHTML = html;
+}
+
+async function marcarPedido(id) {
+  var p = pedidos.find(function(x){return x.id===id;});
+  if (!p) return;
+  var montoEl = document.getElementById('monto-' + id);
+  var monto = montoEl ? parseFloat(montoEl.value)||0 : 0;
+  try { await apiCall({action:'actualizarEstado', id:id, estado:'pedido_realizado', monto:monto}); } catch(e) {}
+  p.monto = monto; p.estado = 'pedido_realizado'; p.fechaEntrega = '-';
+  loadCandela();
+}
+
+function marcarGrupo(proveedor) {
+  pedidos.forEach(function(p) {
+    if ((p.proveedor||'Sin proveedor')===proveedor && p.estado==='pendiente') {
+      p.estado = 'pedido_realizado'; p.monto = 0;
+      apiCall({action:'actualizarEstado', id:p.id, estado:'pedido_realizado', monto:0}).catch(function(){});
+    }
+  });
+  loadCandela();
+}
+
+function rechazarPedido(id) {
+  var p = pedidos.find(function(x){return x.id===id;});
+  if (p) {
+    p.estado = 'rechazado';
+    apiCall({action:'actualizarEstado', id:id, estado:'rechazado'}).catch(function(){});
+  }
+  loadCandela();
+}
+
+async function marcarEntregado(id) {
+  var p = pedidos.find(function(x){return x.id===id;});
+  if (!p) return;
+  try { await apiCall({action:'actualizarEstado', id:id, estado:'entregado'}); } catch(e) {}
+  p.estado = 'entregado';
+  loadCandela();
+}
+
+function showCTab(tab, btn) {
+  ['pend','enc','hist'].forEach(function(t) {
+    document.getElementById('ctab-' + t + '-content').style.display = t===tab ? 'block' : 'none';
+    var b = document.getElementById('ctab-' + t);
+    if (b) b.className = 'itab' + (t===tab ? ' on' : '');
+  });
+}
+
+function loadPagos() {
+  var deudaTotal = deudas.reduce(function(s,d){return s+d.deudaTotal;}, 0);
+  var pagadoMes = pagos.reduce(function(s,p){return s+p.monto;}, 0);
+  var conDeuda = deudas.filter(function(d){return d.deudaTotal>0;}).length;
+  var alDia = deudas.filter(function(d){return d.deudaTotal===0;}).length;
+  var mayorDeuda = deudas.reduce(function(a,b){return b.deudaTotal>a.deudaTotal?b:a;}, {proveedor:'-',deudaTotal:0});
+  var ticket = pagos.length ? pagadoMes/pagos.length : 0;
+  document.getElementById('kpi-deuda').textContent = fmt(deudaTotal);
+  document.getElementById('kpi-con-deuda').textContent = conDeuda;
+  document.getElementById('kpi-pagado').textContent = fmt(pagadoMes);
+  document.getElementById('kpi-cant-pag').textContent = pagos.length;
+  document.getElementById('kpi-mayor').textContent = mayorDeuda.proveedor;
+  document.getElementById('kpi-al-dia').textContent = alDia;
+  document.getElementById('kpi-ticket').textContent = fmt(ticket);
+  renderDeudas();
+  renderHistPagos();
+}
+
+function renderDeudas() {
+  var el = document.getElementById('deuda-list');
+  if (!deudas.length) { el.innerHTML = '<div class="empty">Sin datos de deuda. Carga los saldos iniciales primero.</div>'; return; }
+  var html = '';
+  deudas.forEach(function(d) {
+    var nivel = d.deudaTotal > 300000 ? 'alto' : d.deudaTotal > 100000 ? 'medio' : 'ok';
+    html += '<div class="deuda-card">';
+    html += '<div class="deuda-header">';
+    html += '<div><div class="deuda-name">' + d.proveedor + '</div>';
+    html += '<div style="font-size:11px;color:var(--g5)">' + d.condicion + ' - Vence: ' + d.vencimiento + '</div></div>';
+    html += '<div style="text-align:right"><div class="deuda-total ' + nivel + '">' + fmt(d.deudaTotal) + '</div>';
+    html += '<div style="font-size:10px;color:var(--g5)">' + (d.deudaTotal===0?'Sin deuda':'pendiente') + '</div></div>';
+    html += '</div>';
+    if (d.deudaTotal > 0) {
+      html += '<button class="btn btn-sm btn-y" onclick="irAPagar(\'' + d.proveedor + '\')">Registrar pago</button>';
+    } else {
+      html += '<span class="badge bg">Al dia</span>';
+    }
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function renderHistPagos() {
+  var body = document.getElementById('pagos-body');
+  if (!pagos.length) { body.innerHTML = '<tr><td colspan="6" class="empty">Sin pagos registrados</td></tr>'; return; }
+  var html = '';
+  pagos.forEach(function(p) {
+    html += '<tr>';
+    html += '<td class="mono" style="font-size:10px">' + p.fecha + '</td>';
+    html += '<td style="font-weight:500">' + p.proveedor + '</td>';
+    html += '<td class="mono" style="text-align:right;font-weight:700">' + fmt(p.monto) + '</td>';
+    html += '<td><span class="badge bgr">' + p.medio + '</span></td>';
+    html += '<td style="font-size:11px;color:var(--g5)">' + p.registradoPor + '</td>';
+    html += '<td style="font-size:11px;color:var(--g5)">' + (p.obs||'-') + '</td>';
+    html += '</tr>';
+  });
+  body.innerHTML = html;
+}
+
+function guardarSaldoInicial() {
+  var prov = document.getElementById('si-prov').value;
+  var monto = parseFloat(document.getElementById('si-monto').value);
+  var venc = document.getElementById('si-venc').value;
+  var cond = document.getElementById('si-cond').value;
+  if (!prov) { showAl('al-saldo', 'Selecciona el proveedor.', 'err'); return; }
+  if (!monto || monto < 0) { showAl('al-saldo', 'Ingresa el monto de la deuda.', 'err'); return; }
+  var vencStr = venc ? new Date(venc).toLocaleDateString('es-AR') : '-';
+  var nuevo = {proveedor:prov, monto:monto, vencimiento:vencStr, condicion:cond};
+  var idx = saldosIniciales.findIndex(function(s){return s.proveedor===prov;});
+  if (idx >= 0) saldosIniciales[idx] = nuevo;
+  else saldosIniciales.push(nuevo);
+  var d = deudas.find(function(x){return x.proveedor===prov;});
+  if (d) { d.deudaTotal=monto; d.vencimiento=vencStr; d.condicion=cond; }
+  else deudas.push({proveedor:prov, deudaTotal:monto, vencimiento:vencStr, condicion:cond});
+  renderSaldosIniciales();
+  showAl('al-saldo', 'Saldo inicial guardado.', 'ok');
+  document.getElementById('si-prov').value = '';
+  document.getElementById('si-monto').value = '';
+  loadPagos();
+}
+
+function renderSaldosIniciales() {
+  var body = document.getElementById('saldo-inicial-body');
+  if (!saldosIniciales.length) { body.innerHTML = '<tr><td colspan="5" class="empty">Sin saldos cargados</td></tr>'; return; }
+  var html = '';
+  saldosIniciales.forEach(function(s) {
+    html += '<tr>';
+    html += '<td style="font-weight:600">' + s.proveedor + '</td>';
+    html += '<td class="mono" style="text-align:right;color:var(--rd);font-weight:700">' + fmt(s.monto) + '</td>';
+    html += '<td class="mono" style="font-size:10px">' + s.vencimiento + '</td>';
+    html += '<td style="font-size:11px;color:var(--g5)">' + s.condicion + '</td>';
+    html += '<td><button class="btn btn-xs btn-r" onclick="borrarSaldo(\'' + s.proveedor + '\')">Borrar</button></td>';
+    html += '</tr>';
+  });
+  body.innerHTML = html;
+}
+
+function borrarSaldo(prov) {
+  saldosIniciales = saldosIniciales.filter(function(s){return s.proveedor!==prov;});
+  var d = deudas.find(function(x){return x.proveedor===prov;});
+  if (d) d.deudaTotal = 0;
+  renderSaldosIniciales();
+  loadPagos();
+}
+
+function irAPagar(prov) {
+  document.getElementById('pago-prov').value = prov;
+  showPTab('pago', document.getElementById('ptab-pago'));
+}
+
+function registrarPago() {
+  var prov = document.getElementById('pago-prov').value;
+  var monto = parseFloat(document.getElementById('pago-monto').value);
+  var fecha = document.getElementById('pago-fecha').value;
+  var medio = document.getElementById('pago-medio').value;
+  var obs = document.getElementById('pago-obs').value.trim();
+  if (!prov) { showAl('al-pago', 'Selecciona el proveedor.', 'err'); return; }
+  if (!monto || monto < 1) { showAl('al-pago', 'Ingresa el monto pagado.', 'err'); return; }
+  var fechaStr = fecha ? new Date(fecha).toLocaleDateString('es-AR') : toDay();
+  var nuevoPago = {id:'PAG'+Date.now(), fecha:fechaStr, proveedor:prov, monto:monto, medio:medio, registradoPor:sesion.nombre, obs:obs};
+  apiCall({action:'nuevoPago', id:nuevoPago.id, fecha:fechaStr, proveedor:prov, monto:monto, medio:medio, registradoPor:sesion.nombre, obs:obs}).catch(function(){});
+  pagos.unshift(nuevoPago);
+  var d = deudas.find(function(x){return x.proveedor===prov;});
+  if (d) d.deudaTotal = Math.max(0, d.deudaTotal - monto);
+  showAl('al-pago', 'Pago de ' + fmt(monto) + ' a ' + prov + ' registrado.', 'ok');
+  document.getElementById('pago-monto').value = '';
+  document.getElementById('pago-obs').value = '';
+  loadPagos();
+}
+
+function showPTab(tab, btn) {
+  ['deuda','saldo','pago','histp'].forEach(function(t) {
+    document.getElementById('ptab-' + t + '-content').style.display = t===tab ? 'block' : 'none';
+    var b = document.getElementById('ptab-' + t);
+    if (b) b.className = 'itab' + (t===tab ? ' on' : '');
+  });
+  if (tab === 'saldo') renderSaldosIniciales();
+}
+
+function loadAdmin() {
+  var body = document.getElementById('admin-body');
+  if (!pedidos.length) { body.innerHTML = '<tr><td colspan="7" class="empty">Sin pedidos</td></tr>'; return; }
+  var html = '';
+  pedidos.forEach(function(p) {
+    html += '<tr>';
+    html += '<td class="mono" style="font-size:10px">' + p.fecha + '</td>';
+    html += '<td><span class="tag-area ' + areaClass(p.area) + '">' + p.area + '</span></td>';
+    html += '<td style="font-size:12px">' + (p.proveedor||'-') + '</td>';
+    html += '<td><span class="badge bbl">' + p.items.length + ' item(s)</span></td>';
+    html += '<td style="font-size:11px;color:' + (p.urgenciaMax==='alta'?'#DC2626':p.urgenciaMax==='media'?'#D97706':'#15803D') + '">' + urgLabel(p.urgenciaMax||'media') + '</td>';
+    html += '<td>' + estadoBadge(p.estado) + '</td>';
+    html += '<td class="mono" style="text-align:right">' + (p.monto?fmt(p.monto):'-') + '</td>';
+    html += '</tr>';
+  });
+  body.innerHTML = html;
+  var deudaTotal = deudas.reduce(function(s,d){return s+d.deudaTotal;}, 0);
+  var pagadoMes = pagos.reduce(function(s,p){return s+p.monto;}, 0);
+  var totalItems = pedidos.reduce(function(s,p){return s+(p.items||[]).length;}, 0);
+  var areaCount = {};
+  pedidos.forEach(function(p){areaCount[p.area]=(areaCount[p.area]||0)+1;});
+  var topArea = Object.entries(areaCount).sort(function(a,b){return b[1]-a[1];})[0];
+  var provCount = {};
+  pedidos.forEach(function(p){if(p.proveedor)provCount[p.proveedor]=(provCount[p.proveedor]||0)+1;});
+  var topProv = Object.entries(provCount).sort(function(a,b){return b[1]-a[1];})[0];
+  var entregados = pedidos.filter(function(p){return p.estado==='entregado';}).length;
+  var tasa = pedidos.length ? Math.round(entregados/pedidos.length*100)+'%' : '0%';
+  document.getElementById('adm-total').textContent = pedidos.length;
+  document.getElementById('adm-deuda').textContent = fmt(deudaTotal);
+  document.getElementById('adm-pagado').textContent = fmt(pagadoMes);
+  document.getElementById('adm-pend').textContent = pedidos.filter(function(p){return p.estado==='pendiente';}).length;
+  document.getElementById('adm-items').textContent = totalItems;
+  document.getElementById('adm-area').textContent = topArea ? topArea[0].replace('Fabrica ','') : '-';
+  document.getElementById('adm-prov').textContent = topProv ? topProv[0] : '-';
+  document.getElementById('adm-tasa').textContent = tasa;
+}
+
+function exportarCandela() {
+  var sep = ',';
+  var nl = '\n';
+  function esc(v) { return '"' + String(v||'').replace(/"/g, '""') + '"'; }
+  var csv = 'PORTO GELATO - REPORTE COMPRAS' + nl;
+  csv += 'Generado: ' + toDay() + nl + nl;
+  csv += 'PEDIDOS' + nl;
+  csv += [esc('ID'),esc('Fecha'),esc('Hora'),esc('Area'),esc('Solicitante'),esc('Proveedor'),esc('Items'),esc('Estado'),esc('Monto')].join(sep) + nl;
+  pedidos.forEach(function(p) {
+    var it = (p.items||[]).map(function(i){return i.producto+' '+i.cantidad+' '+i.unidad;}).join(' | ');
+    csv += [esc(p.id),esc(p.fecha),esc(p.hora),esc(p.area),esc(p.solicitante),esc(p.proveedor),esc(it),esc(p.estado),esc(p.monto)].join(sep) + nl;
+  });
+  descargarCSV(csv, 'Porto_Compras_Pedidos');
+}
+
+function exportarPagos() {
+  var sep = ',';
+  var nl = '\n';
+  function esc(v) { return '"' + String(v||'').replace(/"/g, '""') + '"'; }
+  var csv = 'PORTO GELATO - REPORTE PAGOS' + nl;
+  csv += 'Generado: ' + toDay() + nl + nl;
+  csv += 'DEUDA POR PROVEEDOR' + nl;
+  csv += [esc('Proveedor'),esc('Deuda'),esc('Vencimiento'),esc('Condicion')].join(sep) + nl;
+  deudas.forEach(function(d) {
+    csv += [esc(d.proveedor),esc(d.deudaTotal),esc(d.vencimiento),esc(d.condicion)].join(sep) + nl;
+  });
+  csv += nl + 'HISTORIAL DE PAGOS' + nl;
+  csv += [esc('ID'),esc('Fecha'),esc('Proveedor'),esc('Monto'),esc('Medio'),esc('Por'),esc('Obs')].join(sep) + nl;
+  pagos.forEach(function(p) {
+    csv += [esc(p.id),esc(p.fecha),esc(p.proveedor),esc(p.monto),esc(p.medio),esc(p.registradoPor),esc(p.obs)].join(sep) + nl;
+  });
+  descargarCSV(csv, 'Porto_Compras_Pagos');
+}
+
+function exportarAdmin() {
+  var sep = ',';
+  var nl = '\n';
+  function esc(v) { return '"' + String(v||'').replace(/"/g, '""') + '"'; }
+  var csv = 'PORTO GELATO - REPORTE COMPLETO' + nl;
+  csv += 'Generado: ' + toDay() + nl + nl;
+  csv += 'PEDIDOS' + nl;
+  csv += [esc('ID'),esc('Fecha'),esc('Hora'),esc('Area'),esc('Solicitante'),esc('Proveedor'),esc('Items'),esc('Estado'),esc('Monto')].join(sep) + nl;
+  pedidos.forEach(function(p) {
+    var it = (p.items||[]).map(function(i){return i.producto+' '+i.cantidad+' '+i.unidad;}).join(' | ');
+    csv += [esc(p.id),esc(p.fecha),esc(p.hora),esc(p.area),esc(p.solicitante),esc(p.proveedor),esc(it),esc(p.estado),esc(p.monto)].join(sep) + nl;
+  });
+  csv += nl + 'DEUDA POR PROVEEDOR' + nl;
+  csv += [esc('Proveedor'),esc('Deuda'),esc('Vencimiento'),esc('Condicion')].join(sep) + nl;
+  deudas.forEach(function(d) {
+    csv += [esc(d.proveedor),esc(d.deudaTotal),esc(d.vencimiento),esc(d.condicion)].join(sep) + nl;
+  });
+  csv += nl + 'HISTORIAL DE PAGOS' + nl;
+  csv += [esc('ID'),esc('Fecha'),esc('Proveedor'),esc('Monto'),esc('Medio'),esc('Por'),esc('Obs')].join(sep) + nl;
+  pagos.forEach(function(p) {
+    csv += [esc(p.id),esc(p.fecha),esc(p.proveedor),esc(p.monto),esc(p.medio),esc(p.registradoPor),esc(p.obs)].join(sep) + nl;
+  });
+  descargarCSV(csv, 'Porto_Compras_Completo');
+}
+
+function descargarCSV(csv, nombre) {
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = nombre + '_' + toDay().split('/').join('-') + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function apiCall(params) {
+  var url = API_URL + '?' + new URLSearchParams(params).toString();
+  var r = await fetch(url, {redirect:'follow'});
+  var txt = await r.text();
+  return JSON.parse(txt);
+}
+
+function parsePedidos(arr) {
+  return arr.map(function(p) {
+    var items = [];
+    try { items = typeof p.Items==='string' ? JSON.parse(p.Items) : (p.items||[]); } catch(e) {}
+    return {
+      id: p.ID||p.id||'',
+      fecha: p.Fecha||p.fecha||'',
+      hora: p.Hora||p.hora||'',
+      area: p.Area||p.area||'',
+      solicitante: p.Solicitante||p.solicitante||'',
+      proveedor: p.Proveedor||p.proveedor||'',
+      obs: p.Obs||p.obs||'',
+      estado: p.Estado||p.estado||'pendiente',
+      monto: parseFloat(p.Monto||p.monto||0),
+      items: items,
+      urgenciaMax: items.some(function(i){return i.urgencia==='alta';}) ? 'alta' :
+                   items.some(function(i){return i.urgencia==='media';}) ? 'media' : 'baja'
+    };
+  });
+}
+
+function estadoBadge(e) {
+  var m = {
+    pendiente: '<span class="badge by">Pendiente</span>',
+    pedido_realizado: '<span class="badge bbl">En camino</span>',
+    entregado: '<span class="badge bg">Entregado</span>',
+    rechazado: '<span class="badge br">Rechazado</span>'
+  };
+  return m[e] || '<span class="badge bgr">' + e + '</span>';
+}
+
+function urgLabel(u) {
+  return u==='alta' ? 'URGENTE' : u==='media' ? 'Esta semana' : 'Sin urgencia';
+}
+
+function areaClass(a) {
+  return a && a.indexOf('Helad') >= 0 ? 'tag-h' : a && a.indexOf('Repos') >= 0 ? 'tag-r' : 'tag-d';
+}
+
+function showAl(id, msg, type) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'al al-' + (type==='ok'?'ok':'err') + ' on';
+  setTimeout(function() { el.className = 'al'; }, 5000);
+}
+</script>
+</body>
+</html>
