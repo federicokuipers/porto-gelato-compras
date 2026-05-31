@@ -462,23 +462,23 @@ tbody tr:hover{background:var(--g1);}
 
 <script>
 // ================================
-// CONFIGURACIÓN
+// CONFIGURACION
 // ================================
 const API_URL = 'https://script.google.com/macros/s/AKfycbxXKnpp6ywDO6ApP_eFUxa-KSV2wHDkqoT6J6mqO3kQcZL1zTA8TH_8Dws3CNiqsNcs/exec';
 
 const USUARIOS = {
-  helados:    { pass:'hel2026',  rol:'solicitante', nombre:'Jefe Helados',     area:'Fábrica Helados' },
-  reposteria: { pass:'rep2026',  rol:'solicitante', nombre:'Jefa Repostería',  area:'Fábrica Repostería' },
-  direccion:  { pass:'dir2026',  rol:'solicitante', nombre:'Dirección',         area:'Dirección' },
+  helados:    { pass:'hel2026',  rol:'solicitante', nombre:'Jefe Helados',     area:'Fabrica Helados' },
+  reposteria: { pass:'rep2026',  rol:'solicitante', nombre:'Jefa Reposteria',  area:'Fabrica Reposteria' },
+  direccion:  { pass:'dir2026',  rol:'solicitante', nombre:'Direccion',         area:'Direccion' },
   candela:    { pass:'can2026',  rol:'candela',     nombre:'Candela',           area:'Compras' },
   santiago:   { pass:'san2026',  rol:'santiago',    nombre:'Santiago',          area:'Pagos' },
   admin:      { pass:'adm2026',  rol:'admin',       nombre:'Administrador',     area:'Admin' },
 };
 
 const PROVEEDORES = [
-  { nombre:'La Serenísima',           condicion:'Cta. corriente 30 días' },
-  { nombre:'Molinos Río de la Plata', condicion:'Cta. corriente 30 días' },
-  { nombre:'Arcor',                   condicion:'Cta. corriente 15 días' },
+  { nombre:'La Serenisima',           condicion:'Cta. corriente 30 dias' },
+  { nombre:'Molinos Rio de la Plata', condicion:'Cta. corriente 30 dias' },
+  { nombre:'Arcor',                   condicion:'Cta. corriente 15 dias' },
   { nombre:'Distribuidora Norte',     condicion:'Contado' },
   { nombre:'El Trigal',               condicion:'Contado' },
   { nombre:'Otros',                   condicion:'Variable' },
@@ -501,32 +501,32 @@ const uid   = () => 'P' + Date.now().toString().slice(-6);
 // Datos demo
 function initDemo() {
   pedidos = [
-    { id:'P001', fecha:'14/05/2026', hora:'09:15', area:'Fábrica Helados', solicitante:'Jefe Helados',
-      proveedor:'La Serenísima', obs:'Misma calidad siempre', estado:'pendiente', monto:0,
+    { id:'P001', fecha:'14/05/2026', hora:'09:15', area:'Fabrica Helados', solicitante:'Jefe Helados',
+      proveedor:'La Serenisima', obs:'Misma calidad siempre', estado:'pendiente', monto:0,
       items:[
         { producto:'Leche entera', cantidad:200, unidad:'litros', urgencia:'alta', obs:'' },
         { producto:'Crema de leche', cantidad:50, unidad:'litros', urgencia:'alta', obs:'entera' },
         { producto:'Leche en polvo', cantidad:30, unidad:'kg', urgencia:'media', obs:'' },
       ]},
-    { id:'P002', fecha:'14/05/2026', hora:'10:30', area:'Fábrica Repostería', solicitante:'Jefa Repostería',
-      proveedor:'Molinos Río de la Plata', obs:'', estado:'pedido_realizado', monto:45000, fechaEntrega:'16/05/2026',
+    { id:'P002', fecha:'14/05/2026', hora:'10:30', area:'Fabrica Reposteria', solicitante:'Jefa Reposteria',
+      proveedor:'Molinos Rio de la Plata', obs:'', estado:'pedido_realizado', monto:45000, fechaEntrega:'16/05/2026',
       items:[
         { producto:'Harina 000', cantidad:50, unidad:'kg', urgencia:'media', obs:'' },
-        { producto:'Azúcar', cantidad:40, unidad:'kg', urgencia:'media', obs:'' },
+        { producto:'Azucar', cantidad:40, unidad:'kg', urgencia:'media', obs:'' },
       ]},
-    { id:'P003', fecha:'13/05/2026', hora:'16:45', area:'Dirección', solicitante:'Dirección',
+    { id:'P003', fecha:'13/05/2026', hora:'16:45', area:'Direccion', solicitante:'Direccion',
       proveedor:'Distribuidora Norte', obs:'', estado:'entregado', monto:28000,
       items:[
         { producto:'Vasos descartables 250cc', cantidad:2000, unidad:'unidades', urgencia:'baja', obs:'' },
         { producto:'Cucharitas descartables', cantidad:2000, unidad:'unidades', urgencia:'baja', obs:'' },
       ]},
-    { id:'P004', fecha:'13/05/2026', hora:'11:00', area:'Fábrica Helados', solicitante:'Jefe Helados',
+    { id:'P004', fecha:'13/05/2026', hora:'11:00', area:'Fabrica Helados', solicitante:'Jefe Helados',
       proveedor:'Arcor', obs:'', estado:'pendiente', monto:0,
       items:[
         { producto:'Cobertura chocolate semiamargo', cantidad:30, unidad:'kg', urgencia:'baja', obs:'semiamargo' },
         { producto:'Cacao en polvo', cantidad:15, unidad:'kg', urgencia:'baja', obs:'' },
       ]},
-    { id:'P005', fecha:'13/05/2026', hora:'14:20', area:'Fábrica Repostería', solicitante:'Jefa Repostería',
+    { id:'P005', fecha:'13/05/2026', hora:'14:20', area:'Fabrica Reposteria', solicitante:'Jefa Reposteria',
       proveedor:'El Trigal', obs:'El mismo de siempre', estado:'pendiente', monto:0,
       items:[
         { producto:'Dulce de leche repostero', cantidad:20, unidad:'kg', urgencia:'alta', obs:'no el light' },
@@ -534,16 +534,16 @@ function initDemo() {
       ]},
   ];
   pagos = [
-    { id:'PAG001', fecha:'10/05/2026', proveedor:'La Serenísima',           monto:250000, medio:'Transferencia', registradoPor:'Santiago', obs:'Pago factura abril' },
+    { id:'PAG001', fecha:'10/05/2026', proveedor:'La Serenisima',           monto:250000, medio:'Transferencia', registradoPor:'Santiago', obs:'Pago factura abril' },
     { id:'PAG002', fecha:'08/05/2026', proveedor:'Arcor',                   monto:180000, medio:'Cheque',        registradoPor:'Santiago', obs:'' },
     { id:'PAG003', fecha:'05/05/2026', proveedor:'El Trigal',               monto:45000,  medio:'Efectivo',      registradoPor:'Santiago', obs:'' },
   ];
   deudas = [
-    { proveedor:'La Serenísima',           deudaTotal:420000, vencimiento:'20/05/2026', condicion:'Cta. corriente 30 días' },
-    { proveedor:'Molinos Río de la Plata', deudaTotal:180000, vencimiento:'25/05/2026', condicion:'Cta. corriente 30 días' },
-    { proveedor:'Arcor',                   deudaTotal:95000,  vencimiento:'18/05/2026', condicion:'Cta. corriente 15 días' },
-    { proveedor:'El Trigal',               deudaTotal:0,      vencimiento:'—',          condicion:'Contado' },
-    { proveedor:'Distribuidora Norte',     deudaTotal:32000,  vencimiento:'15/05/2026', condicion:'Contado — pendiente' },
+    { proveedor:'La Serenisima',           deudaTotal:420000, vencimiento:'20/05/2026', condicion:'Cta. corriente 30 dias' },
+    { proveedor:'Molinos Rio de la Plata', deudaTotal:180000, vencimiento:'25/05/2026', condicion:'Cta. corriente 30 dias' },
+    { proveedor:'Arcor',                   deudaTotal:95000,  vencimiento:'18/05/2026', condicion:'Cta. corriente 15 dias' },
+    { proveedor:'El Trigal',               deudaTotal:0,      vencimiento:'-',          condicion:'Contado' },
+    { proveedor:'Distribuidora Norte',     deudaTotal:32000,  vencimiento:'15/05/2026', condicion:'Contado - pendiente' },
   ];
 }
 
@@ -554,9 +554,9 @@ function doLogin() {
   const uid  = document.getElementById('login-user').value;
   const pass = document.getElementById('login-pass').value;
   const err  = document.getElementById('login-err');
-  if (!uid) { err.textContent='Seleccioná tu usuario.'; err.classList.add('on'); return; }
+  if (!uid) { err.textContent='Selecciona tu usuario.'; err.classList.add('on'); return; }
   const u = USUARIOS[uid];
-  if (!u || pass !== u.pass) { err.textContent='Contraseña incorrecta.'; err.classList.add('on'); return; }
+  if (!u || pass !== u.pass) { err.textContent='Contrasena incorrecta.'; err.classList.add('on'); return; }
   err.classList.remove('on');
   sesion = { ...u, id: uid };
   document.getElementById('pg-login').style.display = 'none';
@@ -613,8 +613,8 @@ function agregarItem() {
   const uni  = document.getElementById('item-unidad').value;
   const urg  = document.getElementById('item-urgencia').value;
   const obs  = document.getElementById('item-obs').value.trim();
-  if (!prod) { showAl('al-nuevo','Ingresá el nombre del producto.','err'); return; }
-  if (!cant || cant <= 0) { showAl('al-nuevo','Ingresá la cantidad.','err'); return; }
+  if (!prod) { showAl('al-nuevo','Ingresa el nombre del producto.','err'); return; }
+  if (!cant || cant <= 0) { showAl('al-nuevo','Ingresa la cantidad.','err'); return; }
   carrito.push({ id: Date.now(), producto:prod, cantidad:cant, unidad:uni, urgencia:urg, obs });
   document.getElementById('item-producto').value = '';
   document.getElementById('item-cantidad').value = '';
@@ -639,20 +639,20 @@ function renderCarrito() {
   const res = document.getElementById('carrito-resumen');
   const btn = document.getElementById('btn-limpiar');
   if (!carrito.length) {
-    el.innerHTML = '<div class="carrito-empty">Todavía no agregaste ítems.<br>Completá el formulario de arriba y hacé clic en "+ Agregar".</div>';
+    el.innerHTML = '<div class="carrito-empty">Todavia no agregaste items.<br>Completa el formulario de arriba y hace clic en "+ Agregar".</div>';
     res.style.display = 'none';
     btn.style.display = 'none';
     return;
   }
   btn.style.display = 'inline-flex';
   res.style.display = 'flex';
-  document.getElementById('carrito-count').textContent = carrito.length + (carrito.length===1?' ítem':' ítems');
+  document.getElementById('carrito-count').textContent = carrito.length + (carrito.length===1?' item':' items');
   el.innerHTML = carrito.map(item => `
     <div class="item-row">
-      <div class="ir-name">${item.producto}${item.obs ? ` <span style="color:var(--g5);font-weight:400;font-size:11px">— ${item.obs}</span>` : ''}</div>
+      <div class="ir-name">${item.producto}${item.obs ? ` <span style="color:var(--g5);font-weight:400;font-size:11px">- ${item.obs}</span>` : ''}</div>
       <div class="ir-qty">${item.cantidad} ${item.unidad}</div>
       <div class="ir-urg urg-${item.urgencia}">${urgLabel(item.urgencia)}</div>
-      <button class="btn btn-xs btn-r" onclick="quitarItem(${item.id})" style="margin-left:8px">✕</button>
+      <button class="btn btn-xs btn-r" onclick="quitarItem(${item.id})" style="margin-left:8px">x</button>
     </div>`).join('');
 }
 
@@ -660,7 +660,7 @@ function renderCarrito() {
 // ENVIAR PEDIDO
 // ================================
 async function enviarPedido() {
-  if (!carrito.length) { showAl('al-nuevo','Agregá al menos un ítem al pedido.','err'); return; }
+  if (!carrito.length) { showAl('al-nuevo','Agrega al menos un item al pedido.','err'); return; }
   const urgMax = carrito.some(i=>i.urgencia==='alta') ? 'alta' : carrito.some(i=>i.urgencia==='media') ? 'media' : 'baja';
   const nuevo = {
     id: uid(),
@@ -688,11 +688,11 @@ async function enviarPedido() {
     renderCarrito();
     document.getElementById('p-prov').value = '';
     document.getElementById('p-obs').value  = '';
-    showAl('al-nuevo', `Pedido enviado con ${nuevo.items.length} ítem${nuevo.items.length>1?'s':''} — Candela lo recibió.`, 'ok');
+    showAl('al-nuevo', `Pedido enviado con ${nuevo.items.length} item${nuevo.items.length>1?'s':''} - Candela lo recibio.`, 'ok');
   } catch(e) {
-    showAl('al-nuevo','Error de conexión. Intentá de nuevo.','err');
+    showAl('al-nuevo','Error de conexion. Intenta de nuevo.','err');
   } finally {
-    btn.disabled = false; btn.innerHTML = 'Enviar pedido a Candela →';
+    btn.disabled = false; btn.innerHTML = 'Enviar pedido a Candela ->';
   }
 }
 
@@ -718,20 +718,20 @@ async function loadMisPedidos() {
   } catch(e) {}
   const el = document.getElementById('mis-pedidos-list');
   const mis = pedidos.filter(p => p.area === sesion.area);
-  if (!mis.length) { el.innerHTML='<div class="empty">No tenés pedidos aún</div>'; return; }
+  if (!mis.length) { el.innerHTML='<div class="empty">No tenes pedidos aun</div>'; return; }
   el.innerHTML = mis.map(p => `
     <div class="pedido-card ${urgClass(p.urgenciaMax||p.items?.[0]?.urgencia||'media')}">
       <div class="ph">
         <div>
-          <div class="pt">Pedido ${p.id} — ${p.items.length} ítem${p.items.length>1?'s':''}</div>
-          <div class="ps">${p.fecha} ${p.hora} · ${p.proveedor||'Proveedor a definir'}</div>
+          <div class="pt">Pedido ${p.id} - ${p.items.length} item${p.items.length>1?'s':''}</div>
+          <div class="ps">${p.fecha} ${p.hora} . ${p.proveedor||'Proveedor a definir'}</div>
           ${p.obs ? `<div class="ps" style="font-style:italic">"${p.obs}"</div>` : ''}
         </div>
         <div>${estadoBadge(p.estado)}</div>
       </div>
       <div class="items-list">${p.items.map(i=>`
         <div class="item-row">
-          <div class="ir-name">${i.producto}${i.obs?` <span style="color:var(--g5);font-size:10px">— ${i.obs}</span>`:''}</div>
+          <div class="ir-name">${i.producto}${i.obs?` <span style="color:var(--g5);font-size:10px">- ${i.obs}</span>`:''}</div>
           <div class="ir-qty">${i.cantidad} ${i.unidad}</div>
           <div class="ir-urg urg-${i.urgencia}">${urgLabel(i.urgencia)}</div>
         </div>`).join('')}
@@ -777,7 +777,7 @@ async function loadCandela() {
 
 function renderPendientesCandela(pends) {
   const el = document.getElementById('candela-pendientes-list');
-  if (!pends.length) { el.innerHTML='<div class="empty">Sin pedidos pendientes 🎉</div>'; return; }
+  if (!pends.length) { el.innerHTML='<div class="empty">Sin pedidos pendientes </div>'; return; }
   // Agrupar por proveedor
   const grupos = {};
   pends.forEach(p => {
@@ -792,27 +792,27 @@ function renderPendientesCandela(pends) {
       <div class="prov-header">
         <div>
           <div class="prov-name">${prov}</div>
-          <div class="prov-cond">${provInfo ? provInfo.condicion : 'Condición a confirmar'} · ${items.length} pedido${items.length>1?'s':''}, ${totalItems} ítem${totalItems>1?'s':''}</div>
+          <div class="prov-cond">${provInfo ? provInfo.condicion : 'Condicion a confirmar'} . ${items.length} pedido${items.length>1?'s':''}, ${totalItems} item${totalItems>1?'s':''}</div>
         </div>
-        <button class="btn btn-sm btn-y" onclick="marcarGrupoPedido('${prov}')">✓ Marcar todo como pedido</button>
+        <button class="btn btn-sm btn-y" onclick="marcarGrupoPedido('${prov}')">v Marcar todo como pedido</button>
       </div>
       ${items.map(p => `
         <div style="background:var(--g1);border-radius:var(--rs);padding:12px;margin-bottom:8px;border-left:3px solid ${p.items.some(i=>i.urgencia==='alta')?'var(--rd)':'var(--or)'}">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
             <div>
               <span class="tag-area tag-${areaClass(p.area)}">${p.area}</span>
-              <span style="font-size:11px;color:var(--g5);margin-left:8px">${p.solicitante} · ${p.fecha} ${p.hora}</span>
+              <span style="font-size:11px;color:var(--g5);margin-left:8px">${p.solicitante} . ${p.fecha} ${p.hora}</span>
               ${p.obs ? `<div style="font-size:11px;color:var(--g5);font-style:italic;margin-top:3px">"${p.obs}"</div>` : ''}
             </div>
             <div style="display:flex;gap:6px;align-items:center">
               <input type="number" placeholder="Monto total $" id="monto-${p.id}" style="width:130px;border:1.5px solid var(--g2);border-radius:6px;padding:6px 8px;font-size:12px;outline:none" onfocus="this.style.borderColor='var(--y)'" onblur="this.style.borderColor='var(--g2)'">
-              <button class="btn btn-sm btn-g" onclick="marcarPedido('${p.id}')">✓ Pedido</button>
-              <button class="btn btn-sm btn-r" onclick="rechazarPedido('${p.id}')">✗</button>
+              <button class="btn btn-sm btn-g" onclick="marcarPedido('${p.id}')">v Pedido</button>
+              <button class="btn btn-sm btn-r" onclick="rechazarPedido('${p.id}')">x</button>
             </div>
           </div>
           <div class="items-list" style="margin:0">
             ${p.items.map(i=>`<div class="item-row" style="background:var(--wh)">
-              <div class="ir-name">${i.producto}${i.obs?` <span style="color:var(--g5);font-size:10px">— ${i.obs}</span>`:''}</div>
+              <div class="ir-name">${i.producto}${i.obs?` <span style="color:var(--g5);font-size:10px">- ${i.obs}</span>`:''}</div>
               <div class="ir-qty">${i.cantidad} ${i.unidad}</div>
               <div class="ir-urg urg-${i.urgencia}">${urgLabel(i.urgencia)}</div>
             </div>`).join('')}
@@ -828,24 +828,24 @@ function renderEncamino(pends) {
   body.innerHTML = pends.map(p => `<tr>
     <td class="mono" style="font-size:10px">${p.fecha}</td>
     <td><span class="tag-area tag-${areaClass(p.area)}">${p.area}</span></td>
-    <td>${p.proveedor||'—'}</td>
-    <td><span class="badge bbl">${p.items.length} ítem${p.items.length>1?'s':''}</span></td>
-    <td class="mono" style="font-size:10px">${p.fechaEntrega||'—'}</td>
-    <td><button class="btn btn-sm btn-g" onclick="marcarEntregado('${p.id}')">✓ Entregado</button></td>
+    <td>${p.proveedor||'-'}</td>
+    <td><span class="badge bbl">${p.items.length} item${p.items.length>1?'s':''}</span></td>
+    <td class="mono" style="font-size:10px">${p.fechaEntrega||'-'}</td>
+    <td><button class="btn btn-sm btn-g" onclick="marcarEntregado('${p.id}')">v Entregado</button></td>
   </tr>`).join('');
 }
 
 function renderHistorialCandela() {
   const body = document.getElementById('historial-body');
   const todos = pedidos.filter(p => p.estado !== 'pendiente');
-  if (!todos.length) { body.innerHTML='<tr><td colspan="6" class="empty">Sin historial aún</td></tr>'; return; }
+  if (!todos.length) { body.innerHTML='<tr><td colspan="6" class="empty">Sin historial aun</td></tr>'; return; }
   body.innerHTML = todos.map(p => `<tr>
     <td class="mono" style="font-size:10px">${p.fecha}</td>
     <td><span class="tag-area tag-${areaClass(p.area)}">${p.area}</span></td>
-    <td>${p.proveedor||'—'}</td>
-    <td>${p.items.length} ítem${p.items.length>1?'s':''}</td>
+    <td>${p.proveedor||'-'}</td>
+    <td>${p.items.length} item${p.items.length>1?'s':''}</td>
     <td>${estadoBadge(p.estado)}</td>
-    <td class="mono" style="text-align:right">${p.monto ? fmt(p.monto) : '—'}</td>
+    <td class="mono" style="text-align:right">${p.monto ? fmt(p.monto) : '-'}</td>
   </tr>`).join('');
 }
 
@@ -857,17 +857,17 @@ async function marcarPedido(id) {
   try {
     await apiCall({action:'actualizarEstado', id, estado:'pedido_realizado', monto});
   } catch(e) {}
-  p.monto = monto; p.estado = 'pedido_realizado'; p.fechaEntrega = '—';
+  p.monto = monto; p.estado = 'pedido_realizado'; p.fechaEntrega = '-';
   loadCandela();
 }
 
-function marcarGrupoPedido(proveedor) {
+async function marcarGrupoPedido(proveedor) {
   pedidos.filter(p => (p.proveedor||'Sin proveedor definido') === proveedor && p.estado === 'pendiente')
     .forEach(p => { p.estado = 'pedido_realizado'; p.monto = 0; });
   loadCandela();
 }
 
-function rechazarPedido(id) {
+async function rechazarPedido(id) {
   const p = pedidos.find(x => x.id === id);
   if (p) p.estado = 'rechazado';
   loadCandela();
@@ -912,7 +912,7 @@ function renderDeudas() {
       <div class="deuda-header">
         <div>
           <div class="deuda-name">${d.proveedor}</div>
-          <div style="font-size:11px;color:var(--g5)">${d.condicion} · Vence: ${d.vencimiento}</div>
+          <div style="font-size:11px;color:var(--g5)">${d.condicion} . Vence: ${d.vencimiento}</div>
         </div>
         <div style="text-align:right">
           <div class="deuda-total ${nivel}">${fmt(d.deudaTotal)}</div>
@@ -920,8 +920,8 @@ function renderDeudas() {
         </div>
       </div>
       ${d.deudaTotal > 0
-        ? `<button class="btn btn-sm btn-y" onclick="irAPagar('${d.proveedor}')">Registrar pago →</button>`
-        : `<span class="badge bg">✓ Al día</span>`}
+        ? `<button class="btn btn-sm btn-y" onclick="irAPagar('${d.proveedor}')">Registrar pago -></button>`
+        : `<span class="badge bg">v Al dia</span>`}
     </div>`;
   }).join('');
 }
@@ -935,7 +935,7 @@ function renderHistorialPagos() {
     <td class="mono" style="text-align:right;font-weight:700">${fmt(p.monto)}</td>
     <td><span class="badge bgr">${p.medio}</span></td>
     <td style="font-size:11px;color:var(--g5)">${p.registradoPor}</td>
-    <td style="font-size:11px;color:var(--g5)">${p.obs||'—'}</td>
+    <td style="font-size:11px;color:var(--g5)">${p.obs||'-'}</td>
   </tr>`).join('');
 }
 
@@ -944,14 +944,14 @@ function irAPagar(proveedor) {
   showPTab('pago', document.getElementById('ptab-pago'));
 }
 
-function registrarPago() {
+async function registrarPago() {
   const prov  = document.getElementById('pago-prov').value;
   const monto = parseFloat(document.getElementById('pago-monto').value);
   const fecha = document.getElementById('pago-fecha').value;
   const medio = document.getElementById('pago-medio').value;
   const obs   = document.getElementById('pago-obs').value.trim();
-  if (!prov)           { showAl('al-pago','Seleccioná el proveedor.','err'); return; }
-  if (!monto || monto < 1) { showAl('al-pago','Ingresá el monto pagado.','err'); return; }
+  if (!prov)           { showAl('al-pago','Selecciona el proveedor.','err'); return; }
+  if (!monto || monto < 1) { showAl('al-pago','Ingresa el monto pagado.','err'); return; }
   const nuevoPago = { id:'PAG'+Date.now(), fecha: fecha ? new Date(fecha).toLocaleDateString('es-AR') : toDay(), proveedor:prov, monto, medio, registradoPor:sesion.nombre, obs };
   try { await apiCall({action:'nuevoPago', ...nuevoPago}); } catch(e) {}
   pagos.unshift(nuevoPago);
@@ -973,16 +973,16 @@ function showPTab(tab, btn) {
 // ================================
 // ADMIN
 // ================================
-function loadAdmin() {
+async function loadAdmin() {
   const body = document.getElementById('admin-body');
   body.innerHTML = pedidos.map(p => `<tr>
     <td class="mono" style="font-size:10px">${p.fecha}</td>
     <td><span class="tag-area tag-${areaClass(p.area)}">${p.area}</span></td>
-    <td style="font-size:12px">${p.proveedor||'—'}</td>
-    <td><span class="badge bbl">${p.items.length} ítem${p.items.length>1?'s':''}</span></td>
+    <td style="font-size:12px">${p.proveedor||'-'}</td>
+    <td><span class="badge bbl">${p.items.length} item${p.items.length>1?'s':''}</span></td>
     <td><span class="urg-${p.urgenciaMax||'media'}">${urgLabel(p.urgenciaMax||'media')}</span></td>
     <td>${estadoBadge(p.estado)}</td>
-    <td class="mono" style="text-align:right">${p.monto ? fmt(p.monto) : '—'}</td>
+    <td class="mono" style="text-align:right">${p.monto ? fmt(p.monto) : '-'}</td>
   </tr>`).join('');
   const deudaTotal = deudas.reduce((s,d)=>s+d.deudaTotal,0);
   const pagadoMes  = pagos.reduce((s,p)=>s+p.monto,0);
@@ -999,7 +999,7 @@ function estadoBadge(e) {
   const m = { pendiente:'<span class="badge by">Pendiente</span>', pedido_realizado:'<span class="badge bbl">En camino</span>', entregado:'<span class="badge bg">Entregado</span>', rechazado:'<span class="badge br">Rechazado</span>' };
   return m[e] || `<span class="badge bgr">${e}</span>`;
 }
-function urgLabel(u) { return u==='alta'?'🔴 Urgente':u==='media'?'🟡 Esta semana':'🟢 Sin urgencia'; }
+function urgLabel(u) { return u==='alta'?'URGENTE':u==='media'?'Esta semana':'Sin urgencia'; }
 function urgClass(u) { return u==='alta'?'urgente':u==='media'?'media':'baja'; }
 function areaClass(a) { return a.includes('Helad')?'helados':a.includes('Repos')?'reposteria':'direccion'; }
 async function apiCall(params) {
@@ -1017,7 +1017,7 @@ function showAl(id, msg, type) {
   setTimeout(() => el.className='al', 6000);
 }
 
-// Enter en campo producto agrega ítem
+// Enter en campo producto agrega item
 document.addEventListener('keydown', e => {
   if (e.key==='Enter' && document.activeElement.id==='item-producto') agregarItem();
 });
