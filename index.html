@@ -136,26 +136,20 @@ tbody tr:hover{background:var(--g1);}
     <h1>Porto Gelato</h1>
     <p>Gestion de Compras</p>
     <div class="lerr" id="login-err">Usuario o contrasena incorrectos.</div>
+    <form id="login-form" onsubmit="doLogin();return false;" autocomplete="on">
     <div class="lf">
       <label>Usuario</label>
-      <select id="login-user">
-        <option value="">- Selecciona tu usuario -</option>
-        <option value="helados">Fabrica Helados</option>
-        <option value="reposteria">Fabrica Reposteria</option>
-        <option value="direccion">---</option>
-        <option value="candela">Compras</option>
-        <option value="santiago">Pagos</option>
-        <option value="admin">Administrador</option>
-      </select>
+      <input type="text" id="login-user" name="username" autocomplete="username" placeholder="Ingresa tu usuario" onkeydown="if(event.key==='Enter')document.getElementById('login-pass').focus()">
     </div>
     <div class="lf">
       <label>Contrasena</label>
       <div class="pass-wrap">
-        <input type="password" id="login-pass" placeholder="......" onkeydown="if(event.key==='Enter')doLogin()">
+        <input type="password" id="login-pass" name="password" autocomplete="current-password" placeholder="......" onkeydown="if(event.key==='Enter')doLogin()">
         <button class="btn-eye" onclick="togglePass()">ver</button>
       </div>
     </div>
-    <button class="btn btn-y btn-full" onclick="doLogin()" style="margin-top:0">Ingresar</button>
+    <button type="submit" class="btn btn-y btn-full" style="margin-top:0">Ingresar</button>
+    </form>
   </div>
 </div>
 
@@ -473,12 +467,12 @@ function togglePass() {
 }
 
 function doLogin() {
-  var uid = document.getElementById('login-user').value;
+  var uid = document.getElementById('login-user').value.trim().toLowerCase();
   var pass = document.getElementById('login-pass').value;
   var err = document.getElementById('login-err');
-  if (!uid) { err.textContent = 'Selecciona tu usuario.'; err.classList.add('on'); return; }
+  if (!uid) { err.textContent = 'Ingresa tu usuario.'; err.classList.add('on'); return; }
   var u = USUARIOS[uid];
-  if (!u || pass !== u.pass) { err.textContent = 'Contrasena incorrecta.'; err.classList.add('on'); return; }
+  if (!u || pass !== u.pass) { err.textContent = 'Usuario o contrasena incorrectos.'; err.classList.add('on'); return; }
   err.classList.remove('on');
   sesion = {id: uid, pass: u.pass, rol: u.rol, nombre: u.nombre, area: u.area};
   localStorage.setItem('pg_compras_sesion', JSON.stringify(sesion));
@@ -512,6 +506,7 @@ function doLogout() {
   document.getElementById('pg-app').style.display = 'none';
   document.getElementById('pg-login').style.display = 'flex';
   document.getElementById('login-pass').value = '';
+  document.getElementById('login-user').value = '';
   document.getElementById('login-err').classList.remove('on');
 }
 
