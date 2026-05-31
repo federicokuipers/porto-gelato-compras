@@ -1143,9 +1143,19 @@ function borrarSaldoInicial(prov) {
 // EXPORTS
 // ================================
 function exportarCandela() {
-  const sep=','; const esc=v=>'"'+String(v||'').replace(/"/g,'""')+'"';
-  let csv='PORTO GELATO - REPORTE COMPRAS
-'+`Generado: ${toDay()}
+  var sep=',';
+  var esc=function(v){return '"'+String(v||'').replace(/"/g,'""')+'"';};
+  var nl='
+';
+  var csv='PORTO GELATO - REPORTE COMPRAS'+nl+'Generado: '+toDay()+nl+nl;
+  csv+='PEDIDOS'+nl;
+  csv+=['ID','Fecha','Hora','Area','Solicitante','Proveedor','Items','Estado','Monto'].map(esc).join(sep)+nl;
+  pedidos.forEach(function(p) {
+    var it=(p.items||[]).map(function(i){return i.producto+' '+i.cantidad+' '+i.unidad;}).join(' | ');
+    csv+=[p.id,p.fecha,p.hora,p.area,p.solicitante,p.proveedor,it,p.estado,p.monto].map(esc).join(sep)+nl;
+  });
+  descargarCSV(csv,'Porto_Compras_Pedidos');
+}
 
 `;
   csv+='PEDIDOS
@@ -1161,9 +1171,19 @@ function exportarCandela() {
 }
 
 function exportarPagos() {
-  const sep=','; const esc=v=>'"'+String(v||'').replace(/"/g,'""')+'"';
-  let csv='PORTO GELATO - REPORTE PAGOS
-'+`Generado: ${toDay()}
+  var sep=',';
+  var esc=function(v){return '"'+String(v||'').replace(/"/g,'""')+'"';};
+  var nl='
+';
+  var csv='PORTO GELATO - REPORTE PAGOS'+nl+'Generado: '+toDay()+nl+nl;
+  csv+='DEUDA POR PROVEEDOR'+nl;
+  csv+=['Proveedor','Deuda','Vencimiento','Condicion'].map(esc).join(sep)+nl;
+  deudas.forEach(function(d){csv+=[d.proveedor,d.deudaTotal,d.vencimiento,d.condicion].map(esc).join(sep)+nl;});
+  csv+=nl+'HISTORIAL DE PAGOS'+nl;
+  csv+=['ID','Fecha','Proveedor','Monto','Medio','Por','Obs'].map(esc).join(sep)+nl;
+  pagos.forEach(function(p){csv+=[p.id,p.fecha,p.proveedor,p.monto,p.medio,p.registradoPor,p.obs].map(esc).join(sep)+nl;});
+  descargarCSV(csv,'Porto_Compras_Pagos');
+}
 
 `;
   csv+='DEUDA POR PROVEEDOR
@@ -1183,9 +1203,25 @@ HISTORIAL DE PAGOS
 }
 
 function exportarAdmin() {
-  const sep=','; const esc=v=>'"'+String(v||'').replace(/"/g,'""')+'"';
-  let csv='PORTO GELATO - REPORTE COMPLETO
-'+`Generado: ${toDay()}
+  var sep=',';
+  var esc=function(v){return '"'+String(v||'').replace(/"/g,'""')+'"';};
+  var nl='
+';
+  var csv='PORTO GELATO - REPORTE COMPLETO'+nl+'Generado: '+toDay()+nl+nl;
+  csv+='PEDIDOS'+nl;
+  csv+=['ID','Fecha','Hora','Area','Solicitante','Proveedor','Items','Estado','Monto'].map(esc).join(sep)+nl;
+  pedidos.forEach(function(p){
+    var it=(p.items||[]).map(function(i){return i.producto+' '+i.cantidad+' '+i.unidad;}).join(' | ');
+    csv+=[p.id,p.fecha,p.hora,p.area,p.solicitante,p.proveedor,it,p.estado,p.monto].map(esc).join(sep)+nl;
+  });
+  csv+=nl+'DEUDA POR PROVEEDOR'+nl;
+  csv+=['Proveedor','Deuda','Vencimiento','Condicion'].map(esc).join(sep)+nl;
+  deudas.forEach(function(d){csv+=[d.proveedor,d.deudaTotal,d.vencimiento,d.condicion].map(esc).join(sep)+nl;});
+  csv+=nl+'HISTORIAL DE PAGOS'+nl;
+  csv+=['ID','Fecha','Proveedor','Monto','Medio','Por','Obs'].map(esc).join(sep)+nl;
+  pagos.forEach(function(p){csv+=[p.id,p.fecha,p.proveedor,p.monto,p.medio,p.registradoPor,p.obs].map(esc).join(sep)+nl;});
+  descargarCSV(csv,'Porto_Compras_Completo');
+}
 
 `;
   csv+='PEDIDOS
@@ -1214,8 +1250,15 @@ HISTORIAL DE PAGOS
   descargarCSV(csv, 'Porto_Compras_Completo');
 }
 
-function descargarCSV(csv, nombre) {
-  const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
+function descargarCSV(csv,nombre) {
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download=nombre+'_'+toDay().replace(/[/]/g,'-')+'.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href = url;
