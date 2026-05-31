@@ -388,6 +388,7 @@ tbody tr:hover{background:var(--g1);}
   <div class="itabs">
     <button class="itab on" id="ptab-deuda" onclick="showPTab('deuda',this)">Deuda por proveedor</button>
     <button class="itab" id="ptab-pago" onclick="showPTab('pago',this)">Registrar pago</button>
+    <button class="itab" id="ptab-saldo-inicial" onclick="showPTab('saldo-inicial',this)">Saldo inicial</button>
     <button class="itab" id="ptab-historial" onclick="showPTab('historial',this)">Historial pagos</button>
   </div>
 
@@ -424,6 +425,46 @@ tbody tr:hover{background:var(--g1);}
         <div class="ff full"><label>Observaciones</label><input id="pago-obs" placeholder="Ej: Pago parcial, N° de transferencia, etc."></div>
       </div>
       <button class="btn btn-y btn-full" onclick="registrarPago()">Confirmar pago</button>
+    </div>
+  </div>
+
+  <div id="ptab-content-saldo-inicial" style="display:none">
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct">Saldo inicial por proveedor</div><div class="cs">Carga la deuda actual para arrancar desde cero real</div></div>
+      </div>
+      <div id="al-saldo-inicial" class="al"></div>
+      <div class="fg">
+        <div class="ff full"><label>Proveedor</label>
+          <select id="si-prov">
+            <option value="">- Selecciona el proveedor -</option>
+            <option>La Serenisima</option>
+            <option>Molinos Rio de la Plata</option>
+            <option>Arcor</option>
+            <option>Distribuidora Norte</option>
+            <option>El Trigal</option>
+            <option>Otros</option>
+          </select>
+        </div>
+        <div class="ff"><label>Deuda actual ($)</label><input type="number" id="si-monto" placeholder="Ej: 420000" min="0"></div>
+        <div class="ff"><label>Vencimiento</label><input type="date" id="si-venc"></div>
+        <div class="ff full"><label>Condicion de pago</label>
+          <select id="si-cond">
+            <option>Cuenta corriente 30 dias</option>
+            <option>Cuenta corriente 15 dias</option>
+            <option>Contado</option>
+            <option>Variable</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-y btn-full" onclick="guardarSaldoInicial()">Guardar saldo inicial</button>
+    </div>
+    <div class="card" style="margin-top:4px">
+      <div class="ch"><div class="ct">Saldos cargados</div></div>
+      <div class="tw"><table>
+        <thead><tr><th>Proveedor</th><th style="text-align:right">Deuda inicial</th><th>Vencimiento</th><th>Condicion</th><th>Acciones</th></tr></thead>
+        <tbody id="saldo-inicial-body"><tr><td colspan="5" class="empty">Sin saldos cargados</td></tr></tbody>
+      </table></div>
     </div>
   </div>
 
@@ -492,11 +533,24 @@ let carrito = [];
 let pedidos = [];
 let pagos   = [];
 let deudas  = [];
+let saldosIniciales = [];
 
 const fmt   = n => '$' + Math.round(n).toLocaleString('es-AR');
 const toDay = () => new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
 const toTime= () => new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
 const uid   = () => 'P' + Date.now().toString().slice(-6);
+
+// Restaurar sesion al recargar
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('pg_compras_sesion');
+  if (saved) {
+    try {
+      sesion = JSON.parse(saved);
+      initDemo();
+      iniciarApp();
+    } catch(e) { localStorage.removeItem('pg_compras_sesion'); }
+  }
+});
 
 // Datos demo
 function initDemo() {
@@ -559,11 +613,16 @@ function doLogin() {
   if (!u || pass !== u.pass) { err.textContent='Contrasena incorrecta.'; err.classList.add('on'); return; }
   err.classList.remove('on');
   sesion = { ...u, id: uid };
+  localStorage.setItem('pg_compras_sesion', JSON.stringify({id: uid, ...u}));
+  iniciarApp();
+}
+
+function iniciarApp() {
   document.getElementById('pg-login').style.display = 'none';
   document.getElementById('pg-app').style.display   = 'block';
-  document.getElementById('nav-user').textContent   = u.nombre;
-  document.getElementById('nav-role').textContent   = u.area;
-  document.getElementById('p-area').value           = u.area;
+  document.getElementById('nav-user').textContent   = sesion.nombre;
+  document.getElementById('nav-role').textContent   = sesion.area;
+  document.getElementById('p-area').value           = sesion.area;
   document.getElementById('pago-fecha').value       = new Date().toISOString().split('T')[0];
   initDemo();
   setupTabs();
@@ -571,6 +630,7 @@ function doLogin() {
 
 function doLogout() {
   sesion = null; carrito = [];
+  localStorage.removeItem('pg_compras_sesion');
   document.getElementById('pg-app').style.display  = 'none';
   document.getElementById('pg-login').style.display = 'flex';
   document.getElementById('login-pass').value = '';
@@ -770,6 +830,16 @@ async function loadCandela() {
   document.getElementById('kpi-urgentes').textContent    = urgentes.length;
   document.getElementById('kpi-encamino').textContent    = encamino.length;
   document.getElementById('kpi-entregados').textContent  = entregados.length;
+  // Extra KPIs
+  const totalItems = pends.reduce((s,p) => s+(p.items||[]).length, 0);
+  const areas = [...new Set(pends.map(p=>p.area))].length;
+  const provs = [...new Set(pends.map(p=>p.proveedor).filter(Boolean))].length;
+  const hoy = toDay();
+  const delMes = pedidos.filter(p => p.fecha && p.fecha.slice(-4) === hoy.slice(-4) && p.fecha.slice(3,5) === hoy.slice(3,5)).length;
+  document.getElementById('kpi-items-pend').textContent  = totalItems;
+  document.getElementById('kpi-areas').textContent       = areas;
+  document.getElementById('kpi-provs-pend').textContent  = provs;
+  document.getElementById('kpi-mes').textContent         = delMes;
   renderPendientesCandela(pends);
   renderEncamino(encamino);
   renderHistorialCandela();
@@ -897,9 +967,17 @@ function loadPagos() {
   const pagadoMes  = pagos.reduce((s,p) => s + p.monto, 0);
   const conDeuda   = deudas.filter(d => d.deudaTotal > 0).length;
   document.getElementById('kpi-deuda-total').textContent  = fmt(deudaTotal);
-  document.getElementById('kpi-vence-semana').textContent = fmt(95000);
+  document.getElementById('kpi-vence-semana').textContent = fmt(deudas.filter(d=>d.deudaTotal>0).reduce((s,d)=>s+d.deudaTotal,0));
   document.getElementById('kpi-pagado-mes').textContent   = fmt(pagadoMes);
   document.getElementById('kpi-provs-activos').textContent= conDeuda;
+  // Extra KPIs
+  const mayorDeuda = deudas.reduce((a,b) => b.deudaTotal>a.deudaTotal?b:a, {proveedor:'-',deudaTotal:0});
+  const alDia = deudas.filter(d=>d.deudaTotal===0).length;
+  const ticketProm = pagos.length ? pagadoMes/pagos.length : 0;
+  document.getElementById('kpi-cant-pagos').textContent   = pagos.length;
+  document.getElementById('kpi-mayor-deuda').textContent  = mayorDeuda.proveedor;
+  document.getElementById('kpi-al-dia').textContent       = alDia;
+  document.getElementById('kpi-ticket-pago').textContent  = fmt(ticketProm);
   renderDeudas();
   renderHistorialPagos();
 }
@@ -908,21 +986,22 @@ function renderDeudas() {
   const el = document.getElementById('deuda-list');
   el.innerHTML = deudas.map(d => {
     const nivel = d.deudaTotal > 300000 ? 'alto' : d.deudaTotal > 100000 ? 'medio' : 'ok';
-    return `<div class="deuda-card">
-      <div class="deuda-header">
-        <div>
-          <div class="deuda-name">${d.proveedor}</div>
-          <div style="font-size:11px;color:var(--g5)">${d.condicion} . Vence: ${d.vencimiento}</div>
-        </div>
-        <div style="text-align:right">
-          <div class="deuda-total ${nivel}">${fmt(d.deudaTotal)}</div>
-          <div style="font-size:10px;color:var(--g5)">${d.deudaTotal===0?'Sin deuda':'pendiente'}</div>
-        </div>
-      </div>
-      ${d.deudaTotal > 0
-        ? `<button class="btn btn-sm btn-y" onclick="irAPagar('${d.proveedor}')">Registrar pago -></button>`
-        : `<span class="badge bg">v Al dia</span>`}
-    </div>`;
+    const btnPago = d.deudaTotal > 0
+      ? '<button class="btn btn-sm btn-y" onclick="irAPagar(\''+ d.proveedor +'\')">Registrar pago</button>'
+      : '<span class="badge bg">Al dia</span>';
+    return '<div class="deuda-card">' +
+      '<div class="deuda-header">' +
+        '<div>' +
+          '<div class="deuda-name">' + d.proveedor + '</div>' +
+          '<div style="font-size:11px;color:var(--g5)">' + d.condicion + ' - Vence: ' + d.vencimiento + '</div>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          '<div class="deuda-total ' + nivel + '">' + fmt(d.deudaTotal) + '</div>' +
+          '<div style="font-size:10px;color:var(--g5)">' + (d.deudaTotal===0?'Sin deuda':'pendiente') + '</div>' +
+        '</div>' +
+      '</div>' +
+      btnPago +
+    '</div>';
   }).join('');
 }
 
@@ -963,11 +1042,12 @@ async function registrarPago() {
 }
 
 function showPTab(tab, btn) {
-  ['deuda','pago','historial'].forEach(t => {
+  ['deuda','pago','saldo-inicial','historial'].forEach(t => {
     document.getElementById('ptab-content-'+t).style.display = t===tab ? 'block' : 'none';
     const b = document.getElementById('ptab-'+t);
     if (b) b.className = 'itab' + (t===tab?' on':'');
   });
+  if (tab==='saldo-inicial') renderSaldosIniciales();
 }
 
 // ================================
@@ -990,6 +1070,18 @@ async function loadAdmin() {
   document.getElementById('adm-deuda').textContent     = fmt(deudaTotal);
   document.getElementById('adm-pagado').textContent    = fmt(pagadoMes);
   document.getElementById('adm-pendientes').textContent= pedidos.filter(p=>p.estado==='pendiente').length;
+  // Extra KPIs
+  const totalItems2 = pedidos.reduce((s,p)=>s+(p.items||[]).length,0);
+  const areaCount = {}; pedidos.forEach(p=>{areaCount[p.area]=(areaCount[p.area]||0)+1;});
+  const topArea = Object.entries(areaCount).sort((a,b)=>b[1]-a[1])[0];
+  const provCount = {}; pedidos.forEach(p=>{if(p.proveedor)provCount[p.proveedor]=(provCount[p.proveedor]||0)+1;});
+  const topProv = Object.entries(provCount).sort((a,b)=>b[1]-a[1])[0];
+  const entregados2 = pedidos.filter(p=>p.estado==='entregado').length;
+  const tasa = pedidos.length ? Math.round(entregados2/pedidos.length*100)+'%' : '0%';
+  document.getElementById('adm-items').textContent    = totalItems2;
+  document.getElementById('adm-area-top').textContent = topArea ? topArea[0].replace('Fabrica ','') : '-';
+  document.getElementById('adm-prov-top').textContent = topProv ? topProv[0] : '-';
+  document.getElementById('adm-tasa').textContent     = tasa;
 }
 
 // ================================
@@ -1002,6 +1094,150 @@ function estadoBadge(e) {
 function urgLabel(u) { return u==='alta'?'URGENTE':u==='media'?'Esta semana':'Sin urgencia'; }
 function urgClass(u) { return u==='alta'?'urgente':u==='media'?'media':'baja'; }
 function areaClass(a) { return a.includes('Helad')?'helados':a.includes('Repos')?'reposteria':'direccion'; }
+// ================================
+// SALDO INICIAL
+// ================================
+function guardarSaldoInicial() {
+  const prov = document.getElementById('si-prov').value;
+  const monto = parseFloat(document.getElementById('si-monto').value);
+  const venc = document.getElementById('si-venc').value;
+  const cond = document.getElementById('si-cond').value;
+  if (!prov)           { showAl('al-saldo-inicial','Selecciona el proveedor.','err'); return; }
+  if (!monto || monto < 0) { showAl('al-saldo-inicial','Ingresa el monto de la deuda.','err'); return; }
+  const existente = saldosIniciales.findIndex(s => s.proveedor === prov);
+  const nuevo = { proveedor:prov, monto, vencimiento: venc ? new Date(venc).toLocaleDateString('es-AR') : '-', condicion:cond };
+  if (existente >= 0) saldosIniciales[existente] = nuevo;
+  else saldosIniciales.push(nuevo);
+  // Actualizar deudas
+  const d = deudas.find(x => x.proveedor === prov);
+  if (d) { d.deudaTotal = monto; d.vencimiento = nuevo.vencimiento; d.condicion = cond; }
+  else deudas.push({ proveedor:prov, deudaTotal:monto, vencimiento:nuevo.vencimiento, condicion:cond });
+  renderSaldosIniciales();
+  showAl('al-saldo-inicial','Saldo inicial guardado correctamente.','ok');
+  document.getElementById('si-prov').value = '';
+  document.getElementById('si-monto').value = '';
+  loadPagos();
+}
+
+function renderSaldosIniciales() {
+  const body = document.getElementById('saldo-inicial-body');
+  if (!saldosIniciales.length) { body.innerHTML='<tr><td colspan="5" class="empty">Sin saldos cargados aun</td></tr>'; return; }
+  body.innerHTML = saldosIniciales.map(s => `<tr>
+    <td style="font-weight:600">${s.proveedor}</td>
+    <td class="mono" style="text-align:right;font-weight:700;color:var(--rd)">${fmt(s.monto)}</td>
+    <td class="mono" style="font-size:10px">${s.vencimiento}</td>
+    <td style="font-size:11px;color:var(--g5)">${s.condicion}</td>
+    <td><button class="btn btn-xs btn-r" onclick="borrarSaldoInicial('${s.proveedor}')">Borrar</button></td>
+  </tr>`).join('');
+}
+
+function borrarSaldoInicial(prov) {
+  saldosIniciales = saldosIniciales.filter(s => s.proveedor !== prov);
+  const d = deudas.find(x => x.proveedor === prov);
+  if (d) d.deudaTotal = 0;
+  renderSaldosIniciales();
+  loadPagos();
+}
+
+// ================================
+// EXPORTS
+// ================================
+function exportarCandela() {
+  const sep=','; const esc=v=>'"'+String(v||'').replace(/"/g,'""')+'"';
+  let csv='PORTO GELATO - REPORTE COMPRAS
+'+`Generado: ${toDay()}
+
+`;
+  csv+='PEDIDOS
+';
+  csv+=['ID','Fecha','Hora','Area','Solicitante','Proveedor','Items','Estado','Monto'].map(esc).join(sep)+'
+';
+  pedidos.forEach(p => {
+    const itemsStr = (p.items||[]).map(i=>i.producto+' '+i.cantidad+' '+i.unidad).join(' | ');
+    csv+=[p.id,p.fecha,p.hora,p.area,p.solicitante,p.proveedor,itemsStr,p.estado,p.monto].map(esc).join(sep)+'
+';
+  });
+  descargarCSV(csv, 'Porto_Compras_Pedidos');
+}
+
+function exportarPagos() {
+  const sep=','; const esc=v=>'"'+String(v||'').replace(/"/g,'""')+'"';
+  let csv='PORTO GELATO - REPORTE PAGOS
+'+`Generado: ${toDay()}
+
+`;
+  csv+='DEUDA POR PROVEEDOR
+';
+  csv+=['Proveedor','Deuda Total','Vencimiento','Condicion'].map(esc).join(sep)+'
+';
+  deudas.forEach(d => csv+=[d.proveedor,d.deudaTotal,d.vencimiento,d.condicion].map(esc).join(sep)+'
+');
+  csv+='
+HISTORIAL DE PAGOS
+';
+  csv+=['ID','Fecha','Proveedor','Monto','Medio','Registrado por','Obs'].map(esc).join(sep)+'
+';
+  pagos.forEach(p => csv+=[p.id,p.fecha,p.proveedor,p.monto,p.medio,p.registradoPor,p.obs].map(esc).join(sep)+'
+');
+  descargarCSV(csv, 'Porto_Compras_Pagos');
+}
+
+function exportarAdmin() {
+  const sep=','; const esc=v=>'"'+String(v||'').replace(/"/g,'""')+'"';
+  let csv='PORTO GELATO - REPORTE COMPLETO
+'+`Generado: ${toDay()}
+
+`;
+  csv+='PEDIDOS
+';
+  csv+=['ID','Fecha','Hora','Area','Solicitante','Proveedor','Items','Estado','Monto'].map(esc).join(sep)+'
+';
+  pedidos.forEach(p => {
+    const itemsStr = (p.items||[]).map(i=>i.producto+' '+i.cantidad+' '+i.unidad).join(' | ');
+    csv+=[p.id,p.fecha,p.hora,p.area,p.solicitante,p.proveedor,itemsStr,p.estado,p.monto].map(esc).join(sep)+'
+';
+  });
+  csv+='
+DEUDA POR PROVEEDOR
+';
+  csv+=['Proveedor','Deuda Total','Vencimiento','Condicion'].map(esc).join(sep)+'
+';
+  deudas.forEach(d => csv+=[d.proveedor,d.deudaTotal,d.vencimiento,d.condicion].map(esc).join(sep)+'
+');
+  csv+='
+HISTORIAL DE PAGOS
+';
+  csv+=['ID','Fecha','Proveedor','Monto','Medio','Registrado por','Obs'].map(esc).join(sep)+'
+';
+  pagos.forEach(p => csv+=[p.id,p.fecha,p.proveedor,p.monto,p.medio,p.registradoPor,p.obs].map(esc).join(sep)+'
+');
+  descargarCSV(csv, 'Porto_Compras_Completo');
+}
+
+function descargarCSV(csv, nombre) {
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = nombre+'_'+toDay().replace(/\//g,'-')+'.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function togglePass() {
+  const input = document.getElementById('login-pass');
+  const btn   = document.getElementById('btn-eye');
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = 'X';
+    btn.style.color = 'var(--bk)';
+  } else {
+    input.type = 'password';
+    btn.textContent = 'O';
+    btn.style.color = 'var(--g5)';
+  }
+}
+
 async function apiCall(params) {
   const url = API_URL + '?' + new URLSearchParams(params).toString();
   const r = await fetch(url, {redirect:'follow'});
