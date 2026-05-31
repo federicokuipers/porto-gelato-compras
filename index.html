@@ -461,9 +461,9 @@ tbody tr:hover{background:var(--g1);}
 </div><!-- /pg-app -->
 
 <script>
-// ════════════════════════════════
+// ================================
 // CONFIGURACIÓN
-// ════════════════════════════════
+// ================================
 const API_URL = 'https://script.google.com/macros/s/AKfycbxXKnpp6ywDO6ApP_eFUxa-KSV2wHDkqoT6J6mqO3kQcZL1zTA8TH_8Dws3CNiqsNcs/exec';
 
 const USUARIOS = {
@@ -484,9 +484,9 @@ const PROVEEDORES = [
   { nombre:'Otros',                   condicion:'Variable' },
 ];
 
-// ════════════════════════════════
+// ================================
 // STATE
-// ════════════════════════════════
+// ================================
 let sesion = null;
 let carrito = [];
 let pedidos = [];
@@ -547,9 +547,9 @@ function initDemo() {
   ];
 }
 
-// ════════════════════════════════
+// ================================
 // LOGIN
-// ════════════════════════════════
+// ================================
 function doLogin() {
   const uid  = document.getElementById('login-user').value;
   const pass = document.getElementById('login-pass').value;
@@ -590,9 +590,9 @@ function setupTabs() {
   showScr(primera, document.getElementById(tabs[0]));
 }
 
-// ════════════════════════════════
+// ================================
 // NAV
-// ════════════════════════════════
+// ================================
 function showScr(id, btn) {
   document.querySelectorAll('.scr').forEach(e => e.classList.remove('on'));
   document.querySelectorAll('.ntab').forEach(e => e.classList.remove('on'));
@@ -604,9 +604,9 @@ function showScr(id, btn) {
   if (id==='admin')      loadAdmin();
 }
 
-// ════════════════════════════════
+// ================================
 // CARRITO
-// ════════════════════════════════
+// ================================
 function agregarItem() {
   const prod = document.getElementById('item-producto').value.trim();
   const cant = parseFloat(document.getElementById('item-cantidad').value);
@@ -656,9 +656,9 @@ function renderCarrito() {
     </div>`).join('');
 }
 
-// ════════════════════════════════
+// ================================
 // ENVIAR PEDIDO
-// ════════════════════════════════
+// ================================
 async function enviarPedido() {
   if (!carrito.length) { showAl('al-nuevo','Agregá al menos un ítem al pedido.','err'); return; }
   const urgMax = carrito.some(i=>i.urgencia==='alta') ? 'alta' : carrito.some(i=>i.urgencia==='media') ? 'media' : 'baja';
@@ -696,9 +696,9 @@ async function enviarPedido() {
   }
 }
 
-// ════════════════════════════════
+// ================================
 // MIS PEDIDOS
-// ════════════════════════════════
+// ================================
 async function loadMisPedidos() {
   try {
     const d = await apiCall({action:'getPedidos'});
@@ -739,9 +739,9 @@ async function loadMisPedidos() {
     </div>`).join('');
 }
 
-// ════════════════════════════════
+// ================================
 // CANDELA
-// ════════════════════════════════
+// ================================
 async function loadCandela() {
   try {
     const d = await apiCall({action:'getPedidos'});
@@ -889,9 +889,9 @@ function showCTab(tab, btn) {
   });
 }
 
-// ════════════════════════════════
+// ================================
 // PAGOS
-// ════════════════════════════════
+// ================================
 function loadPagos() {
   const deudaTotal = deudas.reduce((s,d) => s + d.deudaTotal, 0);
   const pagadoMes  = pagos.reduce((s,p) => s + p.monto, 0);
@@ -970,9 +970,9 @@ function showPTab(tab, btn) {
   });
 }
 
-// ════════════════════════════════
+// ================================
 // ADMIN
-// ════════════════════════════════
+// ================================
 function loadAdmin() {
   const body = document.getElementById('admin-body');
   body.innerHTML = pedidos.map(p => `<tr>
@@ -992,9 +992,9 @@ function loadAdmin() {
   document.getElementById('adm-pendientes').textContent= pedidos.filter(p=>p.estado==='pendiente').length;
 }
 
-// ════════════════════════════════
+// ================================
 // UTILS
-// ════════════════════════════════
+// ================================
 function estadoBadge(e) {
   const m = { pendiente:'<span class="badge by">Pendiente</span>', pedido_realizado:'<span class="badge bbl">En camino</span>', entregado:'<span class="badge bg">Entregado</span>', rechazado:'<span class="badge br">Rechazado</span>' };
   return m[e] || `<span class="badge bgr">${e}</span>`;
